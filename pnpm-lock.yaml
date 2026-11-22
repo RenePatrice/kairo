@@ -255,6 +255,15 @@ importers:
 
   packages/db: {}
 
+  packages/platform:
+    devDependencies:
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      react:
+        specifier: ^19.0.0
+        version: 19.3.1
+
   packages/ui:
     dependencies:
       '@fontsource-variable/geist':
@@ -266,6 +275,9 @@ importers:
       '@fontsource/instrument-serif':
         specifier: ^5.3.0
         version: 5.3.0
+      '@kairo/platform':
+        specifier: workspace:*
+        version: link:../platform
       motion:
         specifier: ^14.14.0
         version: 14.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)

@@ -1,0 +1,21 @@
+{
+  "name": "@kairo/platform",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interface unique pour ce qui dépend de l'appareil (haptique, notifications, fichiers…) : version web + plugins Capacitor",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "react": "^19.0.0"
+  }
+}
