@@ -8,6 +8,7 @@ import globals from 'globals';
 export default tseslint.config(
   {
     ignores: [
+      '**/*.local.mjs',
       '**/dist',
       '**/coverage',
       '**/node_modules',

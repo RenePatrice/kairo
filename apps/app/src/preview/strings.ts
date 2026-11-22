@@ -133,4 +133,4 @@ const en: Widen<typeof fr> = {
   },
 };
 
-export const appResources = { fr: { app: fr }, en: { app: en } };
+export const previewStrings = { fr: fr.preview, en: en.preview };

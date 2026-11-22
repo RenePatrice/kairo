@@ -181,12 +181,18 @@ export type GlassLevel = keyof typeof glass;
 export const radii = {
   xs: 4,
   block: 8,
+  icon: 12,
   chip: 14,
+  step: 16,
   field: 18,
+  row: 20,
   tile: 22,
+  slot: 24,
   card: 26,
+  wide: 28,
   panel: 30,
-  sheet: 34,
+  /** Fiches de la maquette (feuille du bas décollée des bords). */
+  sheet: 38,
   pill: 9999,
 } as const;
 
@@ -205,12 +211,23 @@ export const fontSizes = {
   label: 11,
   caption: 12,
   small: 13,
+  chip: 14,
   body: 15,
   input: 16,
+  sub: 17,
   lead: 18,
+  heading: 20,
   title: 22,
+  day: 24,
+  serif: 26,
   display: 28,
+  big: 32,
   hero: 34,
+  /** Grands chiffres et titres d'accueil de la maquette. */
+  numeral: 40,
+  splash: 44,
+  countdown: 52,
+  focus: 58,
 } as const;
 
 export const tracking = {

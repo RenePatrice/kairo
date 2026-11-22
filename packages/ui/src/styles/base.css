@@ -54,6 +54,31 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Titre de la maquette : Geist 700 serré, un mot en serif italique d'accent (<em>). */
+@utility headline {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: var(--tracking-tight);
+  color: var(--k-ink);
+  & em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.12em;
+    letter-spacing: -0.01em;
+    color: var(--k-acc-text);
+  }
+}
+
+/* Barres de défilement masquées (listes horizontales de la maquette). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Le mot mis en avant dans un titre : serif italique couleur d'accent. */
 @utility accent-serif {
   font-family: var(--font-serif);
@@ -124,6 +149,49 @@
   50% {
     opacity: 0.35;
   }
+}
+
+@keyframes k-orb {
+  0%,
+  100% {
+    transform: scale(0.82);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes k-burst {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-190px) scale(0.2);
+    opacity: 0;
+  }
+}
+@keyframes k-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+/* Orbe du mode focus qui respire (8 s, comme la maquette). */
+@utility animate-orb {
+  animation: k-orb 8s ease-in-out infinite;
+}
+/* Confettis de la « Journée parfaite ». */
+@utility animate-burst {
+  animation: k-burst 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+/* Ondes autour de l'orbe de l'assistant. */
+@utility animate-ripple {
+  animation: k-ripple 3s ease-out infinite;
 }
 
 @utility animate-spin-iri {
