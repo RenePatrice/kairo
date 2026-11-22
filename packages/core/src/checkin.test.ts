@@ -9,6 +9,7 @@ import {
   streak,
   type CheckMap,
   type HistoryContext,
+  weekDoneMinutes,
 } from './checkin';
 import { addDays, dateKey } from './dates';
 import { occurrencesOn, type Slot } from './schedule';
@@ -89,5 +90,14 @@ describe('check-in', () => {
     expect(isPerfectDay(daily, NOW, { '2026-11-23|a': 'done', '2026-11-23|b': 'done' })).toBe(true);
     expect(isPerfectDay(daily, NOW, { '2026-11-23|a': 'done' })).toBe(false);
     expect(isPerfectDay([], NOW, {})).toBe(false);
+  });
+});
+
+describe('heures validées de la semaine', () => {
+  it('additionne les créneaux faits, par activité', () => {
+    const monday = new Date(2026, 10, 23);
+    const c = { '2026-11-23|a': 'done', '2026-11-24|a': 'done', '2026-11-24|b': 'missed' } as const;
+    expect(weekDoneMinutes(daily, monday, c)).toBe(120);
+    expect(weekDoneMinutes(daily, monday, c, (s) => s.id === 'b')).toBe(0);
   });
 });

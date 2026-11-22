@@ -34,5 +34,6 @@ export {
 export { Sheet, type SheetProps } from './components/Sheet';
 export { Toast, UNDO_WINDOW_MS, type ToastProps } from './components/Toast';
 export { Dock, type DockProps, type DockTab } from './components/Dock';
+export { Overlay, OverlayClose, type OverlayProps } from './components/Overlay';
 export { Field, FieldLabel, Stepper, SwitchRow, type SwitchRowProps } from './components/Form';
 export { ambientColors } from './ambient';

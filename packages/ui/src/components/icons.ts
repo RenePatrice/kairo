@@ -11,6 +11,7 @@ export const icons = {
   close: 'M6 6l12 12M18 6L6 18',
   check: 'M5 12l4 4L19 6',
   moon: 'M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z',
+  play: 'M7 4l13 8-13 8z',
   chevronLeft: 'M15 6l-6 6 6 6',
   chevronRight: 'M9 6l6 6-6 6',
   /** Feuille de la journée off. */

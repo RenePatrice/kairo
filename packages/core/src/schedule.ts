@@ -100,6 +100,11 @@ export function remainingMs(occ: Occurrence, now: Date): number {
   return Math.max(0, occ.end.getTime() - now.getTime());
 }
 
+/** Minutes avant le début (« ENSUITE · 45 min »), arrondies à la minute supérieure. */
+export function minutesUntilStart(occ: Occurrence, now: Date): number {
+  return Math.max(0, Math.ceil((occ.start.getTime() - now.getTime()) / 60_000));
+}
+
 interface Interval<S extends Slot> {
   occurrence: Occurrence<S>;
   /** Minutes relatives au minuit du jour étudié (négatif = veille). */

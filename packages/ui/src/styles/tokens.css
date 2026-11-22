@@ -68,6 +68,7 @@
   --color-danger: #FF7A85;
   --color-streak: #FFC3A0;
   --color-rest: #A3D9A5;
+  --color-sleep: #5B57D9;
 }
 
 @theme inline {

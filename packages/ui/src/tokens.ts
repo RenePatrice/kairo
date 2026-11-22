@@ -152,6 +152,8 @@ export const status = {
   danger: '#FF7A85',
   streak: '#FFC3A0',
   rest: '#A3D9A5',
+  /** Arc du sommeil sur le cadran. */
+  sleep: '#5B57D9',
 } as const;
 
 /**

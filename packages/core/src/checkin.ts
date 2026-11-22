@@ -3,6 +3,7 @@
  * Reprend la logique de la maquette : un jour compte dans la série s'il est tenu à 80 % ou plus.
  */
 import { addDays, dateKey, type DateKey } from './dates';
+import { weekDates } from './week';
 import { occursOn, type Occurrence, type Slot } from './schedule';
 import { durationMin } from './time';
 
@@ -117,4 +118,23 @@ export function isPerfectDay(slots: readonly Slot[], date: Date, checks: CheckMa
   const k = dateKey(date);
   const list = slots.filter((s) => occursOn(s, date));
   return list.length > 0 && list.every((s) => checks[checkKey(k, s.id)] === 'done');
+}
+
+/** Minutes validées (« Fait ») cette semaine pour les créneaux retenus par `match`. */
+export function weekDoneMinutes<S extends Slot>(
+  slots: readonly S[],
+  weekStart: Date,
+  checks: CheckMap,
+  match: (slot: S) => boolean = () => true,
+): number {
+  let total = 0;
+  for (const d of weekDates(weekStart)) {
+    const k = dateKey(d);
+    for (const s of slots) {
+      if (match(s) && occursOn(s, d) && checks[checkKey(k, s.id)] === 'done') {
+        total += durationMin(s.startMin, s.endMin);
+      }
+    }
+  }
+  return total;
 }

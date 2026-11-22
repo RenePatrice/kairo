@@ -3,6 +3,7 @@ import {
   findConflicts,
   freeWindows,
   layoutLanes,
+  minutesUntilStart,
   nowAndNext,
   occurrencesOn,
   occursOn,
@@ -189,5 +190,17 @@ describe('validateSlot', () => {
   it('un créneau ponctuel n’a pas besoin de jours mais d’une date valide', () => {
     expect(validateSlot(slot('a', [], 600, 660, '2026-11-17'))).toEqual([]);
     expect(validateSlot(slot('a', [], 600, 660, '2026-13-01'))).toEqual(['invalid_date']);
+  });
+});
+
+describe('minutesUntilStart', () => {
+  it('compte les minutes avant le début', () => {
+    const [o] = occurrencesOn(
+      [{ id: 'x', days: [0], startMin: 600, endMin: 660 }],
+      new Date(2026, 10, 23),
+    );
+    if (!o) throw new Error('occurrence attendue');
+    expect(minutesUntilStart(o, new Date(2026, 10, 23, 9, 15, 30))).toBe(45);
+    expect(minutesUntilStart(o, new Date(2026, 10, 23, 11))).toBe(0);
   });
 });

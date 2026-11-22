@@ -8,3 +8,4 @@ export * from './week';
 export * from './dial';
 export * from './checkin';
 export * from './focus';
+export * from './reminders';

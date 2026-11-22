@@ -62,6 +62,8 @@ interface UiState {
   dup: number[];
   toast: ToastState | null;
   focus: FocusSession | null;
+  /** Jour (AAAA-MM-JJ) du créneau en focus, pour le check-in « Terminé ». */
+  focusDay: string | null;
   notif: NotifState | null;
   assistant: boolean;
   celebrateAt: number;
@@ -78,7 +80,7 @@ interface UiState {
   toggleDup: (day: number) => void;
   flash: (message: string, actionLabel?: string, action?: () => void | Promise<void>) => void;
   clearToast: () => void;
-  setFocus: (focus: FocusSession | null) => void;
+  setFocus: (focus: FocusSession | null, day?: string | null) => void;
   setNotif: (notif: NotifState | null) => void;
   setAssistant: (open: boolean) => void;
   celebrate: () => void;
@@ -96,6 +98,7 @@ export const useUi = create<UiState>((set) => ({
   dup: [],
   toast: null,
   focus: null,
+  focusDay: null,
   notif: null,
   assistant: false,
   celebrateAt: 0,
@@ -115,7 +118,7 @@ export const useUi = create<UiState>((set) => ({
   flash: (message, actionLabel, action) =>
     set({ toast: { id: ++toastId, message, actionLabel, action } }),
   clearToast: () => set({ toast: null }),
-  setFocus: (focus) => set({ focus, notif: null, sheet: null }),
+  setFocus: (focus, focusDay = null) => set({ focus, focusDay, notif: null, sheet: null }),
   setNotif: (notif) => set({ notif }),
   setAssistant: (assistant) => set({ assistant, sheet: null }),
   celebrate: () => set({ celebrateAt: Date.now() }),
