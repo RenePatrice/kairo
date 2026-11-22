@@ -102,8 +102,8 @@ export function Shell({ screen }: { screen: Screen }) {
               key={screen}
               initial={reduceMotion ? { opacity: 0 } : riseIn.initial}
               animate={riseIn.animate}
-              exit={{ opacity: 0 }}
-              transition={transitionFor('screen', reduceMotion)}
+              exit={{ opacity: 0, transition: { duration: 0.12 } }}
+              transition={{ ...transitionFor('screen', reduceMotion), opacity: { duration: 0.25 } }}
             >
               {screenFor(screen)}
             </motion.div>
