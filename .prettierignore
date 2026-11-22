@@ -4,3 +4,5 @@ coverage
 pnpm-lock.yaml
 docs
 packages/ui/src/styles/tokens.css
+apps/app/android
+apps/app/ios

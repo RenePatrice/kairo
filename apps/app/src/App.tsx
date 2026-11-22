@@ -1,5 +1,5 @@
 import { DbContext } from '@kairo/db';
-import { PlatformContext, createWebPlatform, silentHaptics } from '@kairo/platform';
+import { PlatformContext, detectPlatform, silentHaptics } from '@kairo/platform';
 import { AppearanceProvider, createI18n, themes, type AppLocale } from '@kairo/ui';
 import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { I18nextProvider, useTranslation } from 'react-i18next';
@@ -11,12 +11,12 @@ import { Shell } from './shell/Shell';
 import { useUi } from './store';
 
 const browserLocale: AppLocale = navigator.language.toLowerCase().startsWith('en') ? 'en' : 'fr';
-const webPlatform = createWebPlatform();
+const devicePlatform = detectPlatform();
 // Chargée à la demande : elle n'alourdit pas l'app.
 const PreviewApp = lazy(() =>
   import('./preview/PreviewApp').then((m) => ({ default: m.PreviewApp })),
 );
-const quietPlatform = { ...webPlatform, haptics: silentHaptics };
+const quietPlatform = { ...devicePlatform, haptics: silentHaptics };
 
 export function App() {
   const i18n = useMemo(() => createI18n(browserLocale, appResources), []);
@@ -51,7 +51,7 @@ function Root() {
   return (
     <LocaleSync locale={settings.locale ?? 'fr'}>
       <ThemeSync theme={settings.theme} big={settings.options.big} />
-      <PlatformContext.Provider value={settings.options.haptic ? webPlatform : quietPlatform}>
+      <PlatformContext.Provider value={settings.options.haptic ? devicePlatform : quietPlatform}>
         <AppearanceProvider
           theme={settings.theme}
           accent={settings.accent}

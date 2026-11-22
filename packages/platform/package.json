@@ -17,5 +17,9 @@
   "devDependencies": {
     "@types/react": "^19.3.0",
     "react": "^19.0.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/haptics": "^8.0.2"
   }
 }
