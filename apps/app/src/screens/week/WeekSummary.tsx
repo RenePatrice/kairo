@@ -33,7 +33,6 @@ export function WeekSummary({ weekStart, today }: { weekStart: Date; today: numb
           return (
             <Pressable
               key={i}
-              aria-label={t('week.show', { day: f.dayName(i) })}
               aria-pressed={sel}
               onClick={() => setWeekDay(i)}
               className="flex min-h-8 items-center gap-2.5"
@@ -44,7 +43,8 @@ export function WeekSummary({ weekStart, today }: { weekStart: Date; today: numb
                   sel ? 'text-ink' : i === today ? 'text-acc-text' : 'text-ink3'
                 }`}
               >
-                {f.dayLetter(i)} {d.getDate()}
+                <span aria-hidden="true">{f.dayLetter(i)}</span>
+                <span className="sr-only">{f.dayName(i)}</span> {d.getDate()}
               </span>
               <span
                 className={`relative flex-1 overflow-hidden rounded-block bg-track transition-[height] duration-300 ${

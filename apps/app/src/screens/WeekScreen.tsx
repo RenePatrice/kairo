@@ -59,7 +59,6 @@ export function WeekScreen() {
               key={i}
               haptic
               aria-pressed={on}
-              aria-label={t('week.pillAria', { day: f.dayName(i), hours: f.hours(load) })}
               onClick={() => setWeekDay(i)}
               className={`flex h-21 flex-col items-center justify-center gap-1.25 rounded-tile border ${
                 on
@@ -67,7 +66,10 @@ export function WeekScreen() {
                   : 'border-line bg-card text-ink'
               }`}
             >
-              <span className="text-label font-semibold opacity-80">{f.dayLetter(i)}</span>
+              <span aria-hidden="true" className="text-label font-semibold opacity-80">
+                {f.dayLetter(i)}
+              </span>
+              <span className="sr-only">{f.dayName(i)}</span>
               <span className="relative flex size-8.5 items-center justify-center">
                 <svg
                   width="34"
@@ -102,6 +104,7 @@ export function WeekScreen() {
                 </svg>
                 <span className="num text-chip">{addDays(weekStart, i).getDate()}</span>
               </span>
+              <span className="sr-only">, {t('week.planned', { hours: f.hours(load) })}</span>
               <span
                 aria-hidden="true"
                 className="size-1.25 rounded-pill"

@@ -25,8 +25,9 @@ export function ActivitiesStep() {
       flash(t('acts.nameRequired'));
       return;
     }
-    await addCategory(db, { name, color: form.color, weeklyGoalH: form.weeklyGoalH });
+    // On vide le formulaire tout de suite, pour ne pas effacer ce que l'on tape ensuite.
     setForm(emptyActForm(categories.length + 1));
+    await addCategory(db, { name, color: form.color, weeklyGoalH: form.weeklyGoalH });
   };
 
   const finish = async () => {

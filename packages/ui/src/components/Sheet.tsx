@@ -65,7 +65,7 @@ export function Sheet({
               asChild
               forceMount
               {...(description ? {} : { 'aria-describedby': undefined })}
-              {...(label ? { 'aria-label': label } : {})}
+              {...(label ? { 'aria-label': label, 'aria-labelledby': undefined } : {})}
             >
               <motion.div
                 layoutId={layoutId}

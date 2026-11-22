@@ -1,18 +1,21 @@
 import { DbContext } from '@kairo/db';
 import { PlatformContext, createWebPlatform, silentHaptics } from '@kairo/platform';
 import { AppearanceProvider, createI18n, themes, type AppLocale } from '@kairo/ui';
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import { db } from './db';
 import { appResources } from './i18n';
 import { useAppData } from './lib/data';
 import { DataProvider } from './lib/DataProvider';
-import { PreviewApp } from './preview/PreviewApp';
 import { Shell } from './shell/Shell';
 import { useUi } from './store';
 
 const browserLocale: AppLocale = navigator.language.toLowerCase().startsWith('en') ? 'en' : 'fr';
 const webPlatform = createWebPlatform();
+// Chargée à la demande : elle n'alourdit pas l'app.
+const PreviewApp = lazy(() =>
+  import('./preview/PreviewApp').then((m) => ({ default: m.PreviewApp })),
+);
 const quietPlatform = { ...webPlatform, haptics: silentHaptics };
 
 export function App() {
@@ -21,7 +24,9 @@ export function App() {
     <I18nextProvider i18n={i18n}>
       {/* Page de prévisualisation des composants (Phase 0) : /#preview */}
       {window.location.hash === '#preview' ? (
-        <PreviewApp />
+        <Suspense fallback={null}>
+          <PreviewApp />
+        </Suspense>
       ) : (
         <DbContext.Provider value={db}>
           <DataProvider fallback={null}>

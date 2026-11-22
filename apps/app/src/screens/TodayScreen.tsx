@@ -77,7 +77,6 @@ export function TodayScreen() {
           s: String(s).padStart(2, '0'),
           end: f.clock(cur.slot.endMin),
         }),
-        aria: t('today.open', { name: c.name }),
         onClick: () => focus(cur),
       };
     }
@@ -91,7 +90,6 @@ export function TodayScreen() {
         big: f.duration(wait),
         size: wait >= 60 ? 'text-big' : 'text-numeral',
         sub: t('today.nextAt', { name: c.name, time: f.clock(nextToday.slot.startMin) }),
-        aria: t('today.open', { name: c.name }),
         onClick: () => editBlock(nextToday.slot),
       };
     }
@@ -102,7 +100,6 @@ export function TodayScreen() {
       big: f.clock(nowMin),
       size: 'text-splash',
       sub: todayOcc.length ? t('today.dayDone') : t('today.nothing'),
-      aria: t('today.addSlot'),
       onClick: () => newBlock(),
     };
   })();
@@ -219,7 +216,6 @@ export function TodayScreen() {
               <button
                 type="button"
                 onClick={center.onClick}
-                aria-label={center.aria}
                 className="absolute inset-0 m-auto flex size-42.5 flex-col items-center justify-center gap-1 rounded-pill text-center"
                 style={{ background: `radial-gradient(circle, ${center.halo}, transparent 70%)` }}
               >
@@ -438,7 +434,7 @@ export function TodayScreen() {
                       <Pressable
                         haptic
                         onClick={() => rowAction(o)}
-                        aria-label={
+                        title={
                           st === 'current'
                             ? t('today.action.current')
                             : st === 'done' || st === 'missed'
@@ -451,6 +447,7 @@ export function TodayScreen() {
                         style={chip}
                       >
                         {rowLabel(o)}
+                        <span className="sr-only"> · {c.name}</span>
                       </Pressable>
                     </GlassSurface>
                   </li>

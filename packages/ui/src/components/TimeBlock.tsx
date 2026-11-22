@@ -78,7 +78,12 @@ export function TimeBlock({
           <span className="block h-full w-full rounded-[7px] bg-bg2/85" />
         </span>
       ) : null}
-      <span className={`flex min-w-0 ${compact ? 'items-center gap-2' : 'flex-col gap-0.5'}`}>
+      {/* Bouton : le nom accessible vient de ce texte (contenu visible masqué aux lecteurs d'écran). */}
+      {onClick ? <span className="sr-only">{`${ariaLabel}${suffix}`}</span> : null}
+      <span
+        aria-hidden={onClick ? true : undefined}
+        className={`flex min-w-0 ${compact ? 'items-center gap-2' : 'flex-col gap-0.5'}`}
+      >
         <span className="truncate text-small font-semibold leading-tight">{title}</span>
         <span className="mono-num text-micro opacity-80">{timeLabel}</span>
         {note && !compact ? <span className="truncate text-micro opacity-70">{note}</span> : null}
@@ -98,7 +103,6 @@ export function TimeBlock({
     layoutId,
     className: classes,
     style: { ...surface, ...style },
-    'aria-label': `${ariaLabel}${suffix}`,
     'data-variant': variant,
     transition: transitionFor('interaction', reduceMotion),
   };
@@ -113,7 +117,7 @@ export function TimeBlock({
       {content}
     </motion.button>
   ) : (
-    <motion.div role="group" {...common}>
+    <motion.div role="group" aria-label={`${ariaLabel}${suffix}`} {...common}>
       {content}
     </motion.div>
   );
