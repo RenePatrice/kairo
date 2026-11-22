@@ -6,16 +6,16 @@ IA 100 % open source : Llama sur l'appareil et sur un VPS privé.
 
 ## Contenu de ce dossier
 
-| Chemin | Rôle |
-| --- | --- |
-| `CLAUDE.md` | Règles que Claude Code lit automatiquement à chaque session. |
-| `docs/CAHIER_DES_CHARGES.md` | **Source de vérité** : vision, direction de design, système de design, fonctionnalités, modèle de données, stack, architecture, phases et critères d'acceptation. |
-| `docs/PROMPTS.md` | Un prompt prêt à coller par phase (0 → 3). |
-| `docs/design/prototype/Main.dc.html` | Maquette cliquable de référence (Claude Design). La logique dans `<script>` décrit le comportement attendu de chaque écran. Version en ligne : https://claude.ai/artifact/VdP96V1E2H8nkhUqjha7WT |
-| `docs/design/i18n/fr-en.json` | Toutes les chaînes de la maquette, français → anglais. |
-| `docs/design/logo/` | Logo Kairo en SVG : symbole, versions claire/sombre, icônes d'app 1024 px, logotype. |
-| `docs/design/roadmap.png`, `architecture.png` | Schémas du cahier des charges. |
-| `docs/design/references/` | Pistes de logo et le tableau A3 d'origine (inspiration seulement : le design final est celui du cahier des charges et de la maquette). |
+| Chemin                                        | Rôle                                                                                                                                                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CLAUDE.md`                                   | Règles que Claude Code lit automatiquement à chaque session.                                                                                                                                     |
+| `docs/CAHIER_DES_CHARGES.md`                  | **Source de vérité** : vision, direction de design, système de design, fonctionnalités, modèle de données, stack, architecture, phases et critères d'acceptation.                                |
+| `docs/PROMPTS.md`                             | Un prompt prêt à coller par phase (0 → 3).                                                                                                                                                       |
+| `docs/design/prototype/Main.dc.html`          | Maquette cliquable de référence (Claude Design). La logique dans `<script>` décrit le comportement attendu de chaque écran. Version en ligne : https://claude.ai/artifact/VdP96V1E2H8nkhUqjha7WT |
+| `docs/design/i18n/fr-en.json`                 | Toutes les chaînes de la maquette, français → anglais.                                                                                                                                           |
+| `docs/design/logo/`                           | Logo Kairo en SVG : symbole, versions claire/sombre, icônes d'app 1024 px, logotype.                                                                                                             |
+| `docs/design/roadmap.png`, `architecture.png` | Schémas du cahier des charges.                                                                                                                                                                   |
+| `docs/design/references/`                     | Pistes de logo et le tableau A3 d'origine (inspiration seulement : le design final est celui du cahier des charges et de la maquette).                                                           |
 
 ## Démarrer avec Claude Code
 
