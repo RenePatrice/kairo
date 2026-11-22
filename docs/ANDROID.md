@@ -35,6 +35,32 @@ $env:JAVA_HOME = 'C:\Program Files\Microsoft\jdk-21.0.13.102-hotspot'
 Sans câble : copier `app-debug.apk` sur le téléphone et l'ouvrir (autoriser « Installer des
 applications inconnues » pour le gestionnaire de fichiers).
 
+## APK release signé et aligné
+
+La keystore de publication vit **hors du dépôt**, dans `%USERPROFILE%\.kairo-signing\` :
+
+- `kairo-release.jks` : clé RSA 4096, alias `kairo`, valable 10 000 jours ;
+- `keystore.properties` : `storeFile`, `storePassword`, `keyAlias`, `keyPassword`.
+
+**Sauvegardez ces deux fichiers** (gestionnaire de mots de passe, clé USB chiffrée). Sans eux,
+impossible de publier une mise à jour de l'app sous le même nom.
+
+```powershell
+cd apps\app
+powershell -ExecutionPolicy Bypass -File scripts\android-release.ps1
+# → android\app\build\outputs\apk\release\kairo-<version>-release.apk
+```
+
+Le script : build web + `cap sync` → `gradlew assembleRelease` (non signé) → `zipalign -p 4`
+→ `apksigner sign` (v2 + v3) → vérifie l'alignement et la signature. L'ordre compte : aligner
+**avant** de signer, sinon la signature v2+ est invalidée.
+
+Pour chaque nouvelle version, augmentez `versionCode` (et `versionName`) dans
+`android/app/build.gradle`.
+
+Installer : `C:\Android\Sdk\platform-tools\adb.exe install -r <apk>`. Un APK release ne
+s'installe pas par-dessus l'APK de debug (signatures différentes) : désinstallez d'abord.
+
 ## Ouvrir dans Android Studio (facultatif)
 
 `pnpm android:open`
