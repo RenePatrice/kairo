@@ -1,0 +1,190 @@
+/* Généré depuis src/tokens.ts par `pnpm --filter @kairo/ui gen:css`. Ne pas modifier à la main. */
+
+@theme {
+  --font-sans: 'Geist Variable', Geist, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, monospace;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --spacing: 0.25rem;
+  --radius-xs: 4px;
+  --radius-block: 8px;
+  --radius-chip: 14px;
+  --radius-field: 18px;
+  --radius-tile: 22px;
+  --radius-card: 26px;
+  --radius-panel: 30px;
+  --radius-sheet: 34px;
+  --radius-pill: 9999px;
+  --text-micro: 0.625rem;
+  --text-label: 0.6875rem;
+  --text-caption: 0.75rem;
+  --text-small: 0.8125rem;
+  --text-body: 0.9375rem;
+  --text-input: 1rem;
+  --text-lead: 1.125rem;
+  --text-title: 1.375rem;
+  --text-display: 1.75rem;
+  --text-hero: 2.125rem;
+  --tracking-tight: -0.045em;
+  --tracking-snug: -0.03em;
+  --tracking-label: 0.16em;
+  --breakpoint-tablet: 37.5rem;
+  --breakpoint-desktop: 64rem;
+  --color-act-lavande: #B4A5FF;
+  --color-act-azur: #7CB7FF;
+  --color-act-lagon: #5EE0D2;
+  --color-act-menthe: #7EE2A8;
+  --color-act-citron: #E4F26A;
+  --color-act-miel: #FFC861;
+  --color-act-abricot: #FF9F6E;
+  --color-act-corail: #FF7A85;
+  --color-act-pivoine: #FF8AD8;
+  --color-act-glycine: #D29BFF;
+  --color-act-ardoise: #9AA6C2;
+  --color-act-sable: #D9C3A0;
+  --color-mood-1: #FF7A85;
+  --color-mood-2: #FF9F6E;
+  --color-mood-3: #FFC861;
+  --color-mood-4: #7EE2A8;
+  --color-mood-5: #5EE0D2;
+  --color-success: #7EE2A8;
+  --color-success-ink: #05261A;
+  --color-warning: #FFC861;
+  --color-danger: #FF7A85;
+  --color-streak: #FFC3A0;
+  --color-rest: #A3D9A5;
+}
+
+@theme inline {
+  --color-bg: var(--k-bg);
+  --color-bg2: var(--k-bg2);
+  --color-ink: var(--k-ink);
+  --color-ink2: var(--k-ink2);
+  --color-ink3: var(--k-ink3);
+  --color-line: var(--k-line);
+  --color-card: var(--k-card);
+  --color-card-hi: var(--k-card-hi);
+  --color-solid: var(--k-solid);
+  --color-inv: var(--k-inv);
+  --color-inv-ink: var(--k-inv-ink);
+  --color-shade: var(--k-shade);
+  --color-track: var(--k-track);
+  --color-acc: var(--k-acc);
+  --color-acc-ink: var(--k-acc-ink);
+  --color-acc-text: var(--k-acc-text);
+}
+
+:root {
+  --k-glass-thin-filter: blur(16px) saturate(160%);
+  --k-glass-regular-filter: blur(28px) saturate(180%);
+  --k-glass-thick-filter: blur(40px) saturate(190%);
+  --k-iridescent: #8FA8FF 0%, #B79CFF 20%, #EE9BC6 40%, #FFC3A0 60%, #9EE3D2 80%, #8FA8FF 100%;
+}
+
+.theme-minuit {
+  --k-bg: #080A14;
+  --k-bg2: #0F1222;
+  --k-ink: #F5F6FB;
+  --k-ink2: #B6BBD0;
+  --k-ink3: #7C83A3;
+  --k-line: rgba(255,255,255,0.10);
+  --k-card: rgba(255,255,255,0.055);
+  --k-card-hi: rgba(255,255,255,0.16);
+  --k-solid: #131729;
+  --k-inv: #F5F6FB;
+  --k-inv-ink: #0A0C16;
+  --k-shade: rgba(3,4,10,0.62);
+  --k-track: rgba(255,255,255,0.06);
+  --k-glow-op: 0.55;
+  --k-glass-thin: rgba(255,255,255,0.044);
+  --k-glass-regular: rgba(255,255,255,0.055);
+  --k-glass-thick: rgba(15,18,34,0.62);
+  color-scheme: dark;
+}
+
+.theme-oled {
+  --k-bg: #000000;
+  --k-bg2: #0B0B0D;
+  --k-ink: #FFFFFF;
+  --k-ink2: #A9A9B2;
+  --k-ink3: #80808B;
+  --k-line: rgba(255,255,255,0.09);
+  --k-card: rgba(255,255,255,0.045);
+  --k-card-hi: rgba(255,255,255,0.12);
+  --k-solid: #101012;
+  --k-inv: #FFFFFF;
+  --k-inv-ink: #000000;
+  --k-shade: rgba(0,0,0,0.72);
+  --k-track: rgba(255,255,255,0.06);
+  --k-glow-op: 0.28;
+  --k-glass-thin: rgba(255,255,255,0.036);
+  --k-glass-regular: rgba(255,255,255,0.045);
+  --k-glass-thick: rgba(11,11,13,0.62);
+  color-scheme: dark;
+}
+
+.theme-papier {
+  --k-bg: #F2EEE6;
+  --k-bg2: #FBF9F5;
+  --k-ink: #16141B;
+  --k-ink2: #56525F;
+  --k-ink3: #6E6979;
+  --k-line: rgba(22,20,27,0.10);
+  --k-card: rgba(255,255,255,0.62);
+  --k-card-hi: rgba(255,255,255,0.95);
+  --k-solid: #FFFFFF;
+  --k-inv: #16141B;
+  --k-inv-ink: #F7F4EE;
+  --k-shade: rgba(40,36,30,0.35);
+  --k-track: rgba(22,20,27,0.07);
+  --k-glow-op: 0.3;
+  --k-glass-thin: rgba(255,255,255,0.496);
+  --k-glass-regular: rgba(255,255,255,0.62);
+  --k-glass-thick: rgba(251,249,245,0.74);
+  color-scheme: light;
+}
+
+.accent-lav {
+  --k-acc: #B4A5FF;
+  --k-acc-ink: #16103A;
+  --k-acc-text: #B4A5FF;
+}
+.theme-papier.accent-lav {
+  --k-acc-text: #5B49C7;
+}
+
+.accent-lagon {
+  --k-acc: #5EE0D2;
+  --k-acc-ink: #032A26;
+  --k-acc-text: #5EE0D2;
+}
+.theme-papier.accent-lagon {
+  --k-acc-text: #16756C;
+}
+
+.accent-miel {
+  --k-acc: #FFC861;
+  --k-acc-ink: #2E1E00;
+  --k-acc-text: #FFC861;
+}
+.theme-papier.accent-miel {
+  --k-acc-text: #8A5A00;
+}
+
+.accent-corail {
+  --k-acc: #FF7A85;
+  --k-acc-ink: #3A0710;
+  --k-acc-text: #FF7A85;
+}
+.theme-papier.accent-corail {
+  --k-acc-text: #B8323F;
+}
+
+.accent-menthe {
+  --k-acc: #7EE2A8;
+  --k-acc-ink: #05261A;
+  --k-acc-text: #7EE2A8;
+}
+.theme-papier.accent-menthe {
+  --k-acc-text: #1F7A4A;
+}
+

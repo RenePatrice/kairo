@@ -1,0 +1,166 @@
+/* Base, utilitaires typographiques et animations, repris de la maquette. */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-acc);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-acc) 35%, transparent);
+  }
+}
+
+/* Surtitre en monospace : « // AUJOURD'HUI ». */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-ink3);
+}
+
+/* Libellé discret au-dessus d'une valeur. */
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-ink3);
+}
+
+/* Grands chiffres et titres serrés. */
+@utility num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Heures : chiffres à chasse fixe. */
+@utility mono-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Le mot mis en avant dans un titre : serif italique couleur d'accent. */
+@utility accent-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--color-acc-text);
+}
+
+/* Dégradé irisé réservé à l'IA. */
+@utility iridescent {
+  background: conic-gradient(from var(--k-angle, 0deg), var(--k-iridescent));
+}
+
+/* Zébrures du sommeil. */
+@utility stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-track) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+@property --k-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes k-spin {
+  to {
+    --k-angle: 360deg;
+  }
+}
+@keyframes k-morph {
+  0%,
+  100% {
+    border-radius: 48% 52% 55% 45% / 50% 45% 55% 50%;
+  }
+  33% {
+    border-radius: 58% 42% 45% 55% / 45% 58% 42% 55%;
+  }
+  66% {
+    border-radius: 42% 58% 52% 48% / 58% 42% 58% 42%;
+  }
+}
+@keyframes k-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(30px, -20px);
+  }
+}
+@keyframes k-breath {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+@keyframes k-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@utility animate-spin-iri {
+  animation: k-spin 6s linear infinite;
+}
+@utility animate-morph {
+  animation:
+    k-spin 4s linear infinite,
+    k-morph 5s ease-in-out infinite;
+}
+@utility animate-drift {
+  animation: k-drift 14s ease-in-out infinite;
+}
+@utility animate-breath {
+  animation: k-breath 4s ease-in-out infinite;
+}
+@utility animate-pulse-soft {
+  animation: k-pulse 1.6s ease-in-out infinite;
+}
+
+/* « Réduire les animations » : on coupe les boucles décoratives. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.k-reduce-motion *,
+.k-reduce-motion *::before,
+.k-reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
