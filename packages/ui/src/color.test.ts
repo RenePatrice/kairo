@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contrastRatio, hexToRgb, inkFor, relativeLuminance, withAlpha } from './color';
+import { contrastRatio, hexToRgb, inkFor, relativeLuminance, shade, withAlpha } from './color';
 import { accents, activityPalette, inkOnColor, moodColors, themes } from './tokens';
 
 describe('hexToRgb / withAlpha', () => {
@@ -53,5 +53,13 @@ describe('contraste des tokens', () => {
     for (const hex of [...activityPalette.map((c) => c.hex), ...moodColors]) {
       expect(contrastRatio(hex, inkFor(hex))).toBeGreaterThanOrEqual(4.5);
     }
+  });
+});
+
+describe('shade', () => {
+  it('assombrit et éclaircit', () => {
+    expect(shade('#FF8040', -0.5)).toBe('rgb(128,64,32)');
+    expect(shade('#000000', 0.5)).toBe('rgb(128,128,128)');
+    expect(shade('#B4A5FF', 0)).toBe('rgb(180,165,255)');
   });
 });

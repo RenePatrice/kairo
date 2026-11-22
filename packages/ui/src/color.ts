@@ -44,3 +44,13 @@ export function inkFor(background: string): string {
     ? inkOnColor.dark
     : inkOnColor.light;
 }
+
+/**
+ * Éclaircit (f > 0, vers le blanc) ou assombrit (f < 0, vers le noir) une couleur,
+ * comme `shade()` de la maquette pour le dégradé des créneaux.
+ */
+export function shade(hex: string, f: number): string {
+  const { r, g, b } = hexToRgb(hex);
+  const mix = (v: number) => Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f);
+  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
+}

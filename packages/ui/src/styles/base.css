@@ -71,6 +71,14 @@
   }
 }
 
+/* Textes d'alerte lisibles sur tous les thèmes (mêlés à l'encre du thème : contraste ≥ 4,5:1). */
+@utility text-warn {
+  color: color-mix(in oklab, var(--color-warning) 45%, var(--k-ink));
+}
+@utility text-alert {
+  color: color-mix(in oklab, var(--color-danger) 70%, var(--k-ink));
+}
+
 /* Barres de défilement masquées (listes horizontales de la maquette). */
 @utility no-scrollbar {
   scrollbar-width: none;

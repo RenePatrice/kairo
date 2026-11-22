@@ -207,6 +207,8 @@ export const fonts = {
 
 /** Échelle typographique (px). */
 export const fontSizes = {
+  /** Graduations des graphiques. */
+  tiny: 9,
   micro: 10,
   label: 11,
   caption: 12,
