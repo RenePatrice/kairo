@@ -33,6 +33,8 @@ export interface ThemeTokens {
   track: string;
   /** Opacité des halos d'ambiance. */
   glowOp: number;
+  /** Voile de contraste du verre : luminosité de l'arrière-plan flouté (< 1 assombrit). */
+  glassBrightness: number;
   /** Le thème est-il clair (pour la barre d'état, les ombres) ? */
   light: boolean;
 }
@@ -53,6 +55,7 @@ export const themes: Record<ThemeName, ThemeTokens> = {
     shade: 'rgba(3,4,10,0.62)',
     track: 'rgba(255,255,255,0.06)',
     glowOp: 0.55,
+    glassBrightness: 0.78,
     light: false,
   },
   oled: {
@@ -70,6 +73,7 @@ export const themes: Record<ThemeName, ThemeTokens> = {
     shade: 'rgba(0,0,0,0.72)',
     track: 'rgba(255,255,255,0.06)',
     glowOp: 0.28,
+    glassBrightness: 0.72,
     light: false,
   },
   papier: {
@@ -87,6 +91,7 @@ export const themes: Record<ThemeName, ThemeTokens> = {
     shade: 'rgba(40,36,30,0.35)',
     track: 'rgba(22,20,27,0.07)',
     glowOp: 0.3,
+    glassBrightness: 1.08,
     light: true,
   },
 };

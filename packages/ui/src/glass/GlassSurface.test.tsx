@@ -26,7 +26,7 @@ describe('GlassSurface', () => {
     );
     const el = screen.getByTestId('s');
     expect(el.dataset['glass']).toBe('solid');
-    expect(el.style.background).toBe('var(--color-solid)');
+    expect(el.style.background).toBe('var(--k-solid)');
     expect(el.style.backdropFilter).toBe('');
   });
 

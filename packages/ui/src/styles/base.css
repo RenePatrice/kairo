@@ -7,18 +7,18 @@
   }
   body {
     margin: 0;
-    background: var(--color-bg);
-    color: var(--color-ink);
+    background: var(--k-bg);
+    color: var(--k-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
   :focus-visible {
-    outline: 2px solid var(--color-acc);
+    outline: 2px solid var(--k-acc);
     outline-offset: 2px;
   }
   ::selection {
-    background: color-mix(in oklab, var(--color-acc) 35%, transparent);
+    background: color-mix(in oklab, var(--k-acc) 35%, transparent);
   }
 }
 
@@ -28,7 +28,7 @@
   font-size: var(--text-label);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--color-ink3);
+  color: var(--k-ink3);
 }
 
 /* Libellé discret au-dessus d'une valeur. */
@@ -38,7 +38,7 @@
   font-weight: 500;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--color-ink3);
+  color: var(--k-ink3);
 }
 
 /* Grands chiffres et titres serrés. */
@@ -60,7 +60,7 @@
   font-style: italic;
   font-weight: 400;
   letter-spacing: -0.01em;
-  color: var(--color-acc-text);
+  color: var(--k-acc-text);
 }
 
 /* Dégradé irisé réservé à l'IA. */
@@ -70,11 +70,7 @@
 
 /* Zébrures du sommeil. */
 @utility stripes {
-  background-image: repeating-linear-gradient(
-    135deg,
-    var(--color-track) 0 6px,
-    transparent 6px 12px
-  );
+  background-image: repeating-linear-gradient(135deg, var(--k-track) 0 6px, transparent 6px 12px);
 }
 
 @property --k-angle {

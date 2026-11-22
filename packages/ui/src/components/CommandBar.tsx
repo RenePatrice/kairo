@@ -66,9 +66,16 @@ export function CommandBar({
   };
 
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
+    <div
+      className={`flex flex-col gap-2 ${className}`}
+      onFocus={() => setFocused(true)}
+      onBlur={(e) => {
+        // On reste « actif » tant que le focus est dans la barre ou ses suggestions.
+        if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
+      }}
+    >
       <AnimatePresence initial={false}>
-        {suggestions.length > 0 && !thinking ? (
+        {suggestions.length > 0 && focused && !thinking ? (
           <motion.ul
             id={suggestionsId}
             aria-label={t('command.suggestions')}
@@ -83,6 +90,7 @@ export function CommandBar({
                 <GlassSurface level="thin" as="span" className="block rounded-pill">
                   <Pressable
                     className="min-h-11 rounded-pill px-4 text-small font-medium text-ink2"
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => (onSuggestion ?? onSubmit)(s)}
                   >
                     {s}
@@ -106,7 +114,7 @@ export function CommandBar({
           level="thick"
           className="flex h-15 items-center gap-2 rounded-pill pl-2 pr-2"
         >
-          <form role="search" onSubmit={submit} className="flex flex-1 items-center gap-2">
+          <form role="search" onSubmit={submit} className="flex min-w-0 flex-1 items-center gap-2">
             <span
               aria-hidden="true"
               className="relative flex size-11 flex-none items-center justify-center"
@@ -119,8 +127,6 @@ export function CommandBar({
               ref={inputRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
               aria-label={t('command.label')}
               placeholder={
                 listening

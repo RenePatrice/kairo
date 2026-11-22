@@ -71,7 +71,7 @@ export function Dock({ tabs, current, onSelect, onAssistant, className = '' }: D
           aria-hidden="true"
           className="absolute inset-0 animate-morph iridescent"
           style={{
-            boxShadow: '0 10px 40px color-mix(in oklab, var(--color-acc) 55%, transparent)',
+            boxShadow: '0 10px 40px color-mix(in oklab, var(--k-acc) 55%, transparent)',
           }}
         />
         <span

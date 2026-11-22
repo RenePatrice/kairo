@@ -54,6 +54,11 @@ function themeBlock(name: string, t: ThemeTokens): string {
   lines.push(
     `  --k-glass-thick: ${withAlpha(t.bg2, t.light ? glass.thick.bg2AlphaLight : glass.thick.bg2Alpha)};`,
   );
+  for (const [k, g] of Object.entries(glass)) {
+    lines.push(
+      `  --k-glass-${k}-filter: blur(${g.blur}px) saturate(${g.saturate}%) brightness(${t.glassBrightness});`,
+    );
+  }
   lines.push(`  color-scheme: ${t.light ? 'light' : 'dark'};`);
   return `.theme-${name} {\n${lines.join('\n')}\n}`;
 }
@@ -80,9 +85,7 @@ export function buildTokensCss(): string {
     '  --color-acc-text: var(--k-acc-text);',
   ];
 
-  const glassVars = Object.entries(glass).map(
-    ([k, g]) => `  --k-glass-${k}-filter: blur(${g.blur}px) saturate(${g.saturate}%);`,
-  );
+  const glassVars: string[] = [];
   const stops = iridescent.map((c, i) => `${c} ${Math.round((i / iridescent.length) * 100)}%`);
   glassVars.push(`  --k-iridescent: ${[...stops, `${iridescent[0]} 100%`].join(', ')};`);
 

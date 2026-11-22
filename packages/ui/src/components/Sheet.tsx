@@ -30,6 +30,8 @@ export function Sheet({ open, onOpenChange, title, description, children, layout
   const themeClasses = `theme-${theme} accent-${accent}`;
   const transition = transitionFor('screen', reduceMotion);
   const offscreen = desktop ? { x: '105%' } : { y: '105%' };
+  // Avec un élément partagé, c'est la transformation du bloc qui fait l'animation.
+  const slide = !reduceMotion && !layoutId;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -57,9 +59,9 @@ export function Sheet({ open, onOpenChange, title, description, children, layout
                     ? 'inset-y-3 right-3 w-[26rem] max-w-[calc(100vw-1.5rem)]'
                     : 'inset-x-0 bottom-0 max-h-[92dvh]'
                 }`}
-                initial={reduceMotion ? { opacity: 0 } : offscreen}
-                animate={reduceMotion ? { opacity: 1 } : { x: 0, y: 0 }}
-                exit={reduceMotion ? { opacity: 0 } : offscreen}
+                initial={slide ? offscreen : { opacity: 0 }}
+                animate={slide ? { x: 0, y: 0 } : { opacity: 1 }}
+                exit={slide ? offscreen : { opacity: 0 }}
                 transition={transition}
               >
                 <GlassSurface

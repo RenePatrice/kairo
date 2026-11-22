@@ -47,14 +47,7 @@ export function NowCard({ current, next, className = '' }: NowCardProps) {
               style={{ boxShadow: `0 0 36px 4px ${current.color}`, opacity: 0.5 }}
             />
             <svg viewBox="0 0 100 100" className="relative size-full -rotate-90" aria-hidden="true">
-              <circle
-                cx="50"
-                cy="50"
-                r="44"
-                fill="none"
-                stroke="var(--color-track)"
-                strokeWidth="8"
-              />
+              <circle cx="50" cy="50" r="44" fill="none" stroke="var(--k-track)" strokeWidth="8" />
               <motion.circle
                 cx="50"
                 cy="50"
@@ -74,7 +67,7 @@ export function NowCard({ current, next, className = '' }: NowCardProps) {
             </span>
           </div>
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="eyebrow" style={{ color: 'var(--color-acc-text)' }}>
+            <span className="eyebrow" style={{ color: 'var(--k-acc-text)' }}>
               {'// '}
               {t('now.label')}
             </span>

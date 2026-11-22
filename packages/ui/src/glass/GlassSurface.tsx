@@ -74,14 +74,14 @@ export function GlassSurface({
         WebkitBackdropFilter: `var(--k-glass-${level}-filter)`,
         ...style,
       }
-    : { background: 'var(--color-solid)', ...style };
+    : { background: 'var(--k-solid)', ...style };
 
   return createElement(
     as,
     {
       ...rest,
       'data-glass': isGlass ? level : 'solid',
-      className: `relative isolate border border-line shadow-[inset_0_1px_0_var(--color-card-hi)] ${className}`,
+      className: `relative isolate border border-line shadow-[inset_0_1px_0_var(--k-card-hi)] ${className}`,
       style: surfaceStyle,
       onPointerMove: handleMove,
       onPointerLeave: handleLeave,
@@ -91,7 +91,7 @@ export function GlassSurface({
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit]"
         style={{
-          background: `radial-gradient(120% 80% at var(--k-spec-x, 30%) var(--k-spec-y, 0%), var(--color-card-hi), transparent ${
+          background: `radial-gradient(120% 80% at var(--k-spec-x, 30%) var(--k-spec-y, 0%), var(--k-card-hi), transparent ${
             level === 'thick' ? 55 : 65
           }%)`,
           opacity: glassTokens[level].blur > 20 ? 0.55 : 0.4,

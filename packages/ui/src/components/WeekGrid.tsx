@@ -52,6 +52,11 @@ export interface WeekGridProps {
 /** Les blocs de moins de 45 min passent en version compacte. */
 const COMPACT_UNDER = 45;
 
+/** Le bloc a-t-il une partie visible dans la fenêtre ? */
+function isVisible(block: GridBlock, window: GridWindowProp): boolean {
+  return block.startMin < window.endMin && block.startMin + block.durationMin > window.startMin;
+}
+
 function placement(block: GridBlock, window: GridWindowProp, hourHeight: number): CSSProperties {
   const start = Math.max(block.startMin, window.startMin);
   const end = Math.min(block.startMin + block.durationMin, window.endMin);
@@ -104,20 +109,22 @@ export function DayColumn({
           />
         ))}
         <ul className="contents">
-          {day.blocks.map((b) => (
-            <li key={b.id} style={placement(b, window, hourHeight)}>
-              <TimeBlock
-                title={b.title}
-                timeLabel={b.timeLabel}
-                color={b.color}
-                ariaLabel={b.ariaLabel}
-                variant={b.variant ?? 'default'}
-                compact={b.durationMin < COMPACT_UNDER}
-                layoutId={`block-${day.id}-${b.id}`}
-                {...(b.onClick ? { onClick: b.onClick } : {})}
-              />
-            </li>
-          ))}
+          {day.blocks
+            .filter((b) => isVisible(b, window))
+            .map((b) => (
+              <li key={b.id} style={placement(b, window, hourHeight)}>
+                <TimeBlock
+                  title={b.title}
+                  timeLabel={b.timeLabel}
+                  color={b.color}
+                  ariaLabel={b.ariaLabel}
+                  variant={b.variant ?? 'default'}
+                  compact={b.durationMin < COMPACT_UNDER}
+                  layoutId={`block-${day.id}-${b.id}`}
+                  {...(b.onClick ? { onClick: b.onClick } : {})}
+                />
+              </li>
+            ))}
         </ul>
         {day.isToday && nowMin != null && nowMin >= window.startMin && nowMin <= window.endMin ? (
           <span
@@ -125,7 +132,7 @@ export function DayColumn({
             className="pointer-events-none absolute inset-x-0 z-10 h-0.5 rounded-pill bg-ink"
             style={{
               top: ((nowMin - window.startMin) / 60) * hourHeight,
-              boxShadow: '0 0 8px var(--color-ink)',
+              boxShadow: '0 0 8px var(--k-ink)',
             }}
           />
         ) : null}

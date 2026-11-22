@@ -8,13 +8,18 @@
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview --host",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@kairo/core": "workspace:*",
+    "@kairo/platform": "workspace:*",
     "@kairo/ui": "workspace:*",
+    "i18next": "^27.2.2",
+    "motion": "^14.14.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.3"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",

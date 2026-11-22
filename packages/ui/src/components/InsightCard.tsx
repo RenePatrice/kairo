@@ -37,7 +37,7 @@ export function InsightCard({
         className="absolute inset-0 animate-spin-iri rounded-card iridescent opacity-70"
       />
       <div className="relative flex flex-col gap-3 rounded-[25px] bg-bg2 p-4">
-        <span className="eyebrow" style={{ color: 'var(--color-acc-text)' }}>
+        <span className="eyebrow" style={{ color: 'var(--k-acc-text)' }}>
           {t('insight.badge')}
         </span>
         {title ? <h3 className="m-0 text-lead font-semibold tracking-snug">{title}</h3> : null}

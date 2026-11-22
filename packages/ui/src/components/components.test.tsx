@@ -169,9 +169,11 @@ describe('CommandBar', () => {
     );
     expect(onSubmit).toHaveBeenCalledWith('Déplace mon sport à 18 h');
   });
-  it('propose des suggestions cliquables', async () => {
+  it('propose des suggestions cliquables quand la barre a le focus', async () => {
     const onSubmit = vi.fn();
     renderUi(<ControlledCommandBar onSubmit={onSubmit} />);
+    expect(screen.queryByRole('button', { name: 'Analyse ma semaine' })).toBeNull();
+    await userEvent.click(screen.getByRole('textbox'));
     await userEvent.click(screen.getByRole('button', { name: 'Analyse ma semaine' }));
     expect(onSubmit).toHaveBeenCalledWith('Analyse ma semaine');
   });

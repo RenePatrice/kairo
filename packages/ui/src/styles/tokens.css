@@ -74,9 +74,6 @@
 }
 
 :root {
-  --k-glass-thin-filter: blur(16px) saturate(160%);
-  --k-glass-regular-filter: blur(28px) saturate(180%);
-  --k-glass-thick-filter: blur(40px) saturate(190%);
   --k-iridescent: #8FA8FF 0%, #B79CFF 20%, #EE9BC6 40%, #FFC3A0 60%, #9EE3D2 80%, #8FA8FF 100%;
 }
 
@@ -98,6 +95,9 @@
   --k-glass-thin: rgba(255,255,255,0.044);
   --k-glass-regular: rgba(255,255,255,0.055);
   --k-glass-thick: rgba(15,18,34,0.62);
+  --k-glass-thin-filter: blur(16px) saturate(160%) brightness(0.78);
+  --k-glass-regular-filter: blur(28px) saturate(180%) brightness(0.78);
+  --k-glass-thick-filter: blur(40px) saturate(190%) brightness(0.78);
   color-scheme: dark;
 }
 
@@ -119,6 +119,9 @@
   --k-glass-thin: rgba(255,255,255,0.036);
   --k-glass-regular: rgba(255,255,255,0.045);
   --k-glass-thick: rgba(11,11,13,0.62);
+  --k-glass-thin-filter: blur(16px) saturate(160%) brightness(0.72);
+  --k-glass-regular-filter: blur(28px) saturate(180%) brightness(0.72);
+  --k-glass-thick-filter: blur(40px) saturate(190%) brightness(0.72);
   color-scheme: dark;
 }
 
@@ -140,6 +143,9 @@
   --k-glass-thin: rgba(255,255,255,0.496);
   --k-glass-regular: rgba(255,255,255,0.62);
   --k-glass-thick: rgba(251,249,245,0.74);
+  --k-glass-thin-filter: blur(16px) saturate(160%) brightness(1.08);
+  --k-glass-regular-filter: blur(28px) saturate(180%) brightness(1.08);
+  --k-glass-thick-filter: blur(40px) saturate(190%) brightness(1.08);
   color-scheme: light;
 }
 
