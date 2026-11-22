@@ -64,6 +64,8 @@ test('réglages : anglais et transparence réduite', async ({ page }) => {
 });
 
 test('accessibilité : aucune violation grave', async ({ page }) => {
+  // axe analyse trois écrans complets : plus lent que les autres parcours.
+  test.setTimeout(180_000);
   await onboard(page);
   await addSlot(page, { steps: -36 });
   for (const tab of ['Semaine', 'Aujourd’hui', 'Réglages']) {
