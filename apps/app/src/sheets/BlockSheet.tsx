@@ -339,11 +339,7 @@ export function BlockSheet() {
           {t('common.save')}
         </Button>
         {form.id ? (
-          <Button
-            variant="ghost"
-            className="h-14 flex-1 border-danger/40 bg-transparent text-alert"
-            onClick={() => void remove()}
-          >
+          <Button variant="danger" className="h-14 flex-1" onClick={() => void remove()}>
             {t('common.delete')}
           </Button>
         ) : null}

@@ -177,6 +177,18 @@ export async function setCheck(
   else await db.completions.put({ id, date, blockId, status, updatedAt: stamp() });
 }
 
+/** Ajoute des check-ins en lot (données de démo), sans toucher à ceux qui existent. */
+export async function addChecks(db: KairoDB, checks: CheckMap): Promise<void> {
+  const existing = new Set(await db.completions.toCollection().primaryKeys());
+  const rows = Object.entries(checks)
+    .filter(([id]) => !existing.has(id))
+    .map(([id, status]) => {
+      const [date = '', blockId = ''] = id.split('|');
+      return { id, date, blockId, status, updatedAt: stamp() };
+    });
+  await db.completions.bulkPut(rows);
+}
+
 export async function readChecks(db: KairoDB): Promise<CheckMap> {
   const out: Record<string, 'done' | 'missed'> = {};
   for (const c of await db.completions.toArray()) out[c.id] = c.status;

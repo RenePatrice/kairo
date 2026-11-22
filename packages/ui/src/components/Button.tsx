@@ -1,12 +1,14 @@
 import { Pressable, type PressableProps } from '../motion/Pressable';
 
-export type ButtonVariant = 'primary' | 'accent' | 'ghost';
+export type ButtonVariant = 'primary' | 'accent' | 'ghost' | 'danger';
 export type ButtonSize = 'md' | 'sm';
 
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-inv text-inv-ink',
   accent: 'bg-acc text-acc-ink',
   ghost: 'bg-card text-ink border border-line',
+  /** Action destructrice (Supprimer, Tout effacer). */
+  danger: 'bg-transparent text-alert border border-danger/40',
 };
 
 const sizes: Record<ButtonSize, string> = {

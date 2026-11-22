@@ -3,6 +3,7 @@ import { KairoDB } from './database';
 import { uuidv7 } from './ids';
 import {
   addCategory,
+  addChecks,
   capitalize,
   copyDayBlocks,
   deleteBlock,
@@ -150,6 +151,12 @@ describe('check-in', () => {
     expect(await readChecks(db)).toEqual({ '2026-11-23|b1': 'done', '2026-11-23|b2': 'missed' });
     await setCheck(db, '2026-11-23', 'b1', null);
     expect(await readChecks(db)).toEqual({ '2026-11-23|b2': 'missed' });
+  });
+
+  it('ajoute des check-ins en lot sans écraser', async () => {
+    await setCheck(db, '2026-11-23', 'b1', 'missed');
+    await addChecks(db, { '2026-11-23|b1': 'done', '2026-11-22|b1': 'done' });
+    expect(await readChecks(db)).toEqual({ '2026-11-23|b1': 'missed', '2026-11-22|b1': 'done' });
   });
 
   it('coche et décoche des étapes', async () => {
