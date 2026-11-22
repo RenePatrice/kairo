@@ -10,7 +10,8 @@ import {
 import { useAppearance } from '../appearance/context';
 import { glass as glassTokens, type GlassLevel } from '../tokens';
 
-type SurfaceTag = 'div' | 'section' | 'nav' | 'aside' | 'header' | 'footer' | 'article' | 'dialog';
+type SurfaceTag =
+  'div' | 'span' | 'section' | 'nav' | 'aside' | 'header' | 'footer' | 'article' | 'dialog';
 
 export interface GlassSurfaceProps extends HTMLAttributes<HTMLElement> {
   /** thin : puces, en-têtes · regular : cartes, barre d'onglets · thick : barre IA, feuilles. */

@@ -133,6 +133,9 @@ export const inkOnColor = { dark: '#0B0D18', light: '#FFFFFF' } as const;
 /** Dégradé irisé réservé à l'IA : bouton assistant, contours des propositions fantômes. */
 export const iridescent = ['#8FA8FF', '#B79CFF', '#EE9BC6', '#FFC3A0', '#9EE3D2'] as const;
 
+/** Cœur sombre de l'orbe de l'assistant (dégradé radial). */
+export const orbCore = ['#2A2F52', '#0B0D18'] as const;
+
 /** Humeurs des bilans, de 1 (difficile) à 5 (top). */
 export const moodColors = ['#FF7A85', '#FF9F6E', '#FFC861', '#7EE2A8', '#5EE0D2'] as const;
 
