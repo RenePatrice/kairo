@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { exportBackup, parseBackup, restoreBackup } from './backup';
 import { KairoDB } from './database';
 import {
+  addEnergyLevels,
+  addGoals,
   addReviews,
   countFocusSession,
   deleteGoal,
@@ -103,6 +105,26 @@ describe('suivi', () => {
     expect(added).toBe(1);
     expect(await db.reviews.get('D2026-11-22')).toMatchObject({ mood: 4, a: 'Salle', ai: false });
     expect(await db.reviews.get('W2026-47')).toMatchObject({ ai: true });
+  });
+
+  it('ajoute énergie et objectifs en lot sans écraser', async () => {
+    await setEnergy(db, '2026-11-22', 'a', 1);
+    await addEnergyLevels(db, { '2026-11-22|a': 3, '2026-11-21|a': 2 });
+    expect(await readEnergy(db)).toEqual({ '2026-11-22|a': 1, '2026-11-21|a': 2 });
+    await saveGoal(db, {
+      id: 'W2026-47',
+      scope: 'W',
+      kind: 'rate',
+      target: 90,
+      categoryId: null,
+      text: '',
+    });
+    await addGoals(db, [
+      { id: 'W2026-47', scope: 'W', kind: 'hours', target: 5, categoryId: null, text: '' },
+      { id: 'D2026-11-20', scope: 'D', kind: 'blocks', target: 2, text: '' },
+    ]);
+    expect(await db.goals.get('W2026-47')).toMatchObject({ kind: 'rate' });
+    expect(await db.goals.count()).toBe(2);
   });
 
   it('retient les trophées vus et compte les sessions focus', async () => {

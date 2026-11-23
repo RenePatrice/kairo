@@ -3,8 +3,10 @@
  * déterministe (même résultat à chaque fois pour un même planning).
  */
 import { checkKey, type CheckMap, type CheckStatus } from './checkin';
-import { addDays, dateKey } from './dates';
+import { addDays, dateKey, startOfWeek, weekKey } from './dates';
 import { occursOn, type Slot } from './schedule';
+import type { EnergyLevel } from './stats';
+import { weekLoads } from './week';
 
 export const DEMO_DAYS = 55;
 
@@ -31,4 +33,50 @@ export function demoHistory(slots: readonly Slot[], today: Date, days = DEMO_DAY
     }
   }
   return out;
+}
+
+export interface DemoExtras {
+  /** Notes d'énergie des créneaux faits (clé `AAAA-MM-JJ|id`). */
+  energy: Record<string, EnergyLevel>;
+  /** Objectifs du jour « N créneaux » (clé `D2026-11-22`). */
+  dayGoals: Array<{ key: string; target: number }>;
+  /** Objectifs de semaine en heures (clé `W2026-47`). */
+  weekGoals: Array<{ key: string; target: number }>;
+  /** Humeurs de bilans passés (clé `D…` ou `W…`). */
+  reviews: Array<{ key: string; mood: number }>;
+}
+
+/** Le reste de la démo de la maquette : énergie, objectifs et humeurs, dérivés des check-ins. */
+export function demoExtras(slots: readonly Slot[], today: Date, checks: CheckMap): DemoExtras {
+  const energy: Record<string, EnergyLevel> = {};
+  for (const [k, status] of Object.entries(checks)) {
+    if (status !== 'done' || stableRandom(`${k}e`) >= 0.7) continue;
+    const slot = slots.find((s) => s.id === k.split('|')[1]);
+    if (!slot) continue;
+    const v = stableRandom(`${k}v`);
+    energy[k] =
+      slot.startMin < 720 ? (v < 0.7 ? 3 : 2) : slot.startMin < 1080 ? 2 : v < 0.5 ? 1 : 2;
+  }
+  const dayGoals: DemoExtras['dayGoals'] = [];
+  const reviews: DemoExtras['reviews'] = [];
+  for (let j = 1; j <= 13; j++) {
+    const d = addDays(today, -j);
+    const dk = dateKey(d);
+    const n = slots.filter((s) => !s.once && occursOn(s, d)).length;
+    if (!n) continue;
+    const hv = stableRandom(`${dk}m`);
+    reviews.push({ key: `D${dk}`, mood: hv < 0.1 ? 2 : hv < 0.35 ? 3 : hv < 0.8 ? 4 : 5 });
+    if (stableRandom(`${dk}g`) < 0.7) dayGoals.push({ key: `D${dk}`, target: n });
+  }
+  const plannedH = Math.max(
+    1,
+    Math.round(weekLoads(slots, startOfWeek(today)).reduce((a, b) => a + b, 0) / 60),
+  );
+  const weekGoals: DemoExtras['weekGoals'] = [];
+  for (let w = 1; w <= 7; w++) {
+    const key = weekKey(addDays(today, -7 * w));
+    weekGoals.push({ key, target: Math.max(1, Math.round(plannedH * 0.8)) });
+    if (w <= 3) reviews.push({ key, mood: w === 1 ? 4 : 3 });
+  }
+  return { energy, dayGoals, weekGoals, reviews };
 }

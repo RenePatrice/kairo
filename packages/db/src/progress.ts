@@ -74,3 +74,25 @@ export async function countFocusSession(db: KairoDB): Promise<number> {
   await updateSettings(db, { focusCount });
   return focusCount;
 }
+
+/** Ajoute des notes d'énergie en lot (données de démo), sans toucher à celles qui existent. */
+export async function addEnergyLevels(db: KairoDB, levels: EnergyMap): Promise<void> {
+  await db.transaction('rw', db.energy, async () => {
+    const existing = new Set(await db.energy.toCollection().primaryKeys());
+    const rows = Object.entries(levels)
+      .filter(([id]) => !existing.has(id))
+      .map(([id, level]) => ({ id, level, updatedAt: stamp() }));
+    await db.energy.bulkPut(rows);
+  });
+}
+
+/** Ajoute des objectifs en lot (données de démo), sans écraser ceux qui existent. */
+export async function addGoals(db: KairoDB, inputs: readonly GoalInput[]): Promise<void> {
+  await db.transaction('rw', db.goals, async () => {
+    const existing = new Set(await db.goals.toCollection().primaryKeys());
+    const rows = inputs
+      .filter((g) => !existing.has(g.id))
+      .map((g) => GoalSchema.parse({ ...g, updatedAt: stamp() }));
+    await db.goals.bulkPut(rows);
+  });
+}

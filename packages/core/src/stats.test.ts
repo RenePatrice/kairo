@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MONDAY, NOW, PREV_MONDAY, SLOTS, makeHistory } from './__fixtures__/history';
+import { weekKey } from './dates';
 import {
   activityWeek,
   dailyHistory,
@@ -10,10 +11,12 @@ import {
   momentum,
   rateBetween,
   weekBars,
+  weekHistory,
   weekGoalProgress,
   weekInsight,
   weekdayRates,
   type ActivityWeek,
+  type WeekGoal,
 } from './stats';
 
 const daily = () => dailyHistory(SLOTS, NOW, makeHistory());
@@ -159,5 +162,43 @@ describe('objectifs', () => {
   it('suit un objectif de régularité sans rien de dû', () => {
     const p = weekGoalProgress({ kind: 'rate', target: 50 }, [], MONDAY, NOW, makeHistory());
     expect(p).toEqual({ value: 0, status: 'below', points: [] });
+  });
+});
+
+describe('weekHistory', () => {
+  const goals: Record<string, WeekGoal> = { [weekKey(PREV_MONDAY)]: { kind: 'hours', target: 13 } };
+  const history = () => weekHistory(SLOTS, NOW, makeHistory(), (ws) => goals[weekKey(ws)]);
+
+  it('donne 8 semaines, la semaine en cours comptée jusqu’à maintenant', () => {
+    const h = history();
+    expect(h).toHaveLength(8);
+    expect(h[7]).toMatchObject({
+      perCategory: { x: 60 },
+      totalMin: 60,
+      rate: 1,
+      current: true,
+      goalReached: null,
+    });
+    expect(h[6]).toMatchObject({
+      perCategory: { x: 420, y: 360 },
+      totalMin: 780,
+      rate: 13 / 14,
+      goalReached: true,
+    });
+    expect(h[5]).toMatchObject({ totalMin: 360, rate: 0.5, current: false });
+    expect(h[0]).toMatchObject({ totalMin: 0, rate: null });
+  });
+
+  it('évalue les objectifs de régularité et d’activité', () => {
+    const run = (goal: WeekGoal) =>
+      weekHistory(SLOTS, NOW, makeHistory(), (ws) =>
+        weekKey(ws) === weekKey(PREV_MONDAY) ? goal : undefined,
+      )[6]?.goalReached;
+    expect(run({ kind: 'rate', target: 95 })).toBe(false);
+    expect(run({ kind: 'act', target: 6, categoryId: 'y' })).toBe(true);
+    expect(run({ kind: 'act', target: 1 })).toBe(false);
+    expect(
+      weekHistory([], NOW, makeHistory(), () => ({ kind: 'rate', target: 0 }))[7]?.goalReached,
+    ).toBe(false);
   });
 });

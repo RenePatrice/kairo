@@ -144,6 +144,42 @@ export const orbCore = ['#2A2F52', '#0B0D18'] as const;
 /** Humeurs des bilans, de 1 (difficile) à 5 (top). */
 export const moodColors = ['#FF7A85', '#FF9F6E', '#FFC861', '#7EE2A8', '#5EE0D2'] as const;
 
+/** Couleurs des 14 trophées de la maquette. */
+export const trophyColors = {
+  first: '#7EE2A8',
+  streak3: '#FFC3A0',
+  streak7: '#FF9F6E',
+  streak30: '#FF7A85',
+  perfectDay: '#FFC861',
+  goalWeek: '#B79CFF',
+  h10: '#8FA8FF',
+  h50: '#7CB7FF',
+  h100: '#5EE0D2',
+  focus5: '#EE9BC6',
+  reviewer: '#9EE3D2',
+  early: '#FFC3A0',
+  night: '#8FA8FF',
+  rest: '#A3D9A5',
+} as const;
+
+/** Barres « Ton énergie selon le moment » : matin, après-midi, soir. */
+export const energyGradients = [
+  'linear-gradient(180deg, #FFC861, #FF9F6E)',
+  'linear-gradient(180deg, #5EE0D2, #7CB7FF)',
+  'linear-gradient(180deg, #B4A5FF, #FF8AD8)',
+] as const;
+
+/** Légende « Heures par activité » du graphique des semaines. */
+export const hoursLegendGradient = 'linear-gradient(180deg, #B4A5FF, #5EE0D2)';
+
+/** Fond « aurore » du récap de la semaine (bouton et stories de la maquette). */
+export const recap = {
+  aurora:
+    'radial-gradient(120% 90% at 100% 0%, rgba(255,195,160,.55) 0%, transparent 45%), radial-gradient(90% 80% at 0% 100%, rgba(143,168,255,.55) 0%, transparent 55%), linear-gradient(140deg, #1C1846 0%, #33205E 45%, #5A2652 100%)',
+  ink: '#FFFFFF',
+  accent: '#FFE1F3',
+} as const;
+
 /** Couleurs de statut. */
 export const status = {
   success: '#7EE2A8',

@@ -1,7 +1,6 @@
-import { demoHistory, minuteOfDay, nowAndNext, occurrencesOn } from '@kairo/core';
+import { minuteOfDay, nowAndNext, occurrencesOn } from '@kairo/core';
 import {
   accentNames,
-  addChecks,
   exportBackup,
   resetAll,
   themeNames,
@@ -24,6 +23,7 @@ import {
 } from '@kairo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBilanActions } from '../lib/bilans';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
 import { useSheetActions } from '../lib/actions';
@@ -108,11 +108,7 @@ export function SettingsScreen() {
     setNotif({ kind: 'start', blockId: b.id, lead: b.reminderMin || DEFAULT_TEST_LEAD });
   };
 
-  const fillDemo = async () => {
-    if (!blocks.length) return flash(t('settings.needBlocks'));
-    await addChecks(db, demoHistory(blocks, now));
-    flash(t('settings.demoDone'));
-  };
+  const { fillDemo } = useBilanActions();
 
   const reset = async () => {
     if (!armed) {

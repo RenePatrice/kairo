@@ -5,7 +5,8 @@ import { activityPalette } from '@kairo/ui';
 import { create } from 'zustand';
 
 export type Screen = 'lang' | 'welcome' | 'rhythm' | 'acts' | 'today' | 'week' | 'stats' | 'me';
-export type SheetKind = 'block' | 'act' | 'dup' | null;
+export type SheetKind = 'block' | 'act' | 'dup' | 'goal' | 'review' | null;
+export type StatTab = 'day' | 'week' | 'trophy';
 
 export interface BlockForm {
   id: string | null;
@@ -25,6 +26,36 @@ export interface ActForm {
   name: string;
   color: string;
   weeklyGoalH: number;
+}
+
+/** Fiche Objectif (maquette : `gf`). */
+export interface GoalForm {
+  scope: 'D' | 'W';
+  /** `D2026-11-23` ou `W2026-48`. */
+  key: string;
+  kind: 'blocks' | 'hours' | 'free' | 'rate' | 'act';
+  target: number;
+  text: string;
+  categoryId: string | null;
+  /** Heures prévues sur la semaine et créneaux prévus ce jour-là (valeurs proposées). */
+  hoursDefault: number;
+  blocksDefault: number;
+  /** Minutes prévues ce jour-là (indice « prévu : … »). */
+  plannedMin: number;
+}
+
+/** Fiche Bilan (maquette : `rf`). */
+export interface ReviewForm {
+  scope: 'D' | 'W';
+  key: string;
+  /** Jour concerné (minuit, en ms). */
+  date: number;
+  mood: number;
+  a: string;
+  b: string;
+  next: string;
+  summary: string;
+  ai: boolean;
 }
 
 export interface ToastState {
@@ -111,6 +142,11 @@ interface UiState {
   notif: NotifState | null;
   assistant: boolean;
   chat: AssistantChat;
+  statTab: StatTab;
+  goalForm: GoalForm | null;
+  reviewForm: ReviewForm | null;
+  /** Récap en stories ouvert (index de l'écran), ou `null`. */
+  recap: number | null;
   celebrateAt: number;
 
   go: (screen: Screen) => void;
@@ -132,6 +168,12 @@ interface UiState {
   pushMessages: (msgs: AiMessage[], patch?: Partial<AssistantChat>) => void;
   patchMessage: (id: string, patch: Partial<Extract<AiMessage, { role: 'ai' }>>) => void;
   newChat: () => void;
+  setStatTab: (tab: StatTab) => void;
+  openGoal: (form: GoalForm) => void;
+  patchGoal: (patch: Partial<GoalForm>) => void;
+  openReview: (form: ReviewForm) => void;
+  patchReview: (patch: Partial<ReviewForm>) => void;
+  setRecap: (index: number | null) => void;
   celebrate: () => void;
 }
 
@@ -151,6 +193,10 @@ export const useUi = create<UiState>((set) => ({
   notif: null,
   assistant: false,
   chat: emptyChat(),
+  statTab: 'week',
+  goalForm: null,
+  reviewForm: null,
+  recap: null,
   celebrateAt: 0,
 
   go: (screen) => set({ screen, sheet: null }),
@@ -182,5 +228,12 @@ export const useUi = create<UiState>((set) => ({
       },
     })),
   newChat: () => set({ chat: emptyChat() }),
+  setStatTab: (statTab) => set({ statTab }),
+  openGoal: (goalForm) => set({ sheet: 'goal', goalForm }),
+  patchGoal: (patch) => set((s) => (s.goalForm ? { goalForm: { ...s.goalForm, ...patch } } : {})),
+  openReview: (reviewForm) => set({ sheet: 'review', reviewForm }),
+  patchReview: (patch) =>
+    set((s) => (s.reviewForm ? { reviewForm: { ...s.reviewForm, ...patch } } : {})),
+  setRecap: (recap) => set({ recap }),
   celebrate: () => set({ celebrateAt: Date.now() }),
 }));

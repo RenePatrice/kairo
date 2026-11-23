@@ -5,7 +5,7 @@
  * Tout est factuel : les phrases sont rédigées par l'interface (i18n) ou par l'IA.
  */
 import { checkKey, dayStats, type CheckMap, type DayStats, type HistoryContext } from './checkin';
-import { addDays, dateKey, isoWeekday, startOfDay, type DateKey } from './dates';
+import { addDays, dateKey, isoWeekday, startOfDay, startOfWeek, type DateKey } from './dates';
 import { occursOn, type Slot } from './schedule';
 import { durationMin } from './time';
 import { weekDates } from './week';
@@ -325,4 +325,72 @@ export function weekGoalProgress(
   const status: WeekGoalStatus =
     hours >= goal.target ? 'reached' : rt >= 1 ? 'ahead' : rt >= 0.85 ? 'on_track' : 'behind';
   return { value: hours, status, points };
+}
+
+export interface WeekEntry {
+  weekStart: Date;
+  /** Minutes validées par activité. */
+  perCategory: Record<string, number>;
+  totalMin: number;
+  /** Régularité (0..1), `null` sans créneau dû. */
+  rate: number | null;
+  /** `null` sans objectif pour cette semaine. */
+  goalReached: boolean | null;
+  current: boolean;
+}
+
+/**
+ * Les `weeks` dernières semaines (lundi → dimanche), de la plus ancienne à la semaine en cours,
+ * comptée jusqu'à maintenant (graphique « Évolution · 8 semaines » de la maquette).
+ */
+export function weekHistory(
+  slots: readonly CategorySlot[],
+  now: Date,
+  ctx: HistoryContext,
+  goalOf: (weekStart: Date) => WeekGoal | undefined,
+  weeks = 8,
+): WeekEntry[] {
+  const thisWeek = startOfWeek(now);
+  const today = isoWeekday(now);
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const out: WeekEntry[] = [];
+  for (let k = weeks - 1; k >= 0; k--) {
+    const weekStart = addDays(thisWeek, -7 * k);
+    const perCategory: Record<string, number> = {};
+    let totalMin = 0;
+    let due = 0;
+    let done = 0;
+    for (let d = 0; d < 7; d++) {
+      if (k === 0 && d > today) break;
+      const date = addDays(weekStart, d);
+      const st = dayStats(slots, date, ctx, k === 0 && d === today ? nowMin : undefined);
+      due += st.due;
+      done += st.done;
+      const key = dateKey(date);
+      for (const s of slots) {
+        if (!occursOn(s, date) || ctx.checks[checkKey(key, s.id)] !== 'done') continue;
+        const m = durationMin(s.startMin, s.endMin);
+        perCategory[s.categoryId] = (perCategory[s.categoryId] ?? 0) + m;
+        totalMin += m;
+      }
+    }
+    const goal = goalOf(weekStart);
+    let goalReached: boolean | null = null;
+    if (goal) {
+      goalReached =
+        goal.kind === 'rate'
+          ? due > 0 && (done / due) * 100 >= goal.target
+          : (goal.kind === 'act' ? (perCategory[goal.categoryId ?? ''] ?? 0) : totalMin) / 60 >=
+            goal.target;
+    }
+    out.push({
+      weekStart,
+      perCategory,
+      totalMin,
+      rate: due ? done / due : null,
+      goalReached,
+      current: k === 0,
+    });
+  }
+  return out;
 }
