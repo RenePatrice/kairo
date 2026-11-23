@@ -4,9 +4,10 @@
  * des journées off et les réglages. Les schémas Zod sont la source de vérité des types ;
  * ils valident aussi les sauvegardes importées.
  */
+import { AiSuggestion } from '@kairo/ai';
 import { z } from 'zod';
 
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const minute = z.number().int().min(0).max(1439);
@@ -70,6 +71,57 @@ export type StepProgress = z.infer<typeof StepProgressSchema>;
 export const RestDaySchema = z.object({ date: isoDate, updatedAt: timestamp });
 export type RestDay = z.infer<typeof RestDaySchema>;
 
+/** Note d'énergie après « Fait » : 1 vidé, 2 correct, 3 en feu. */
+export const EnergySchema = z.object({
+  /** `AAAA-MM-JJ|idDuCréneau`. */
+  id: z.string().min(1),
+  level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  updatedAt: timestamp,
+});
+export type Energy = z.infer<typeof EnergySchema>;
+
+const goalText = z.string().max(120);
+
+/** Objectif du jour (`D2026-11-23`) ou de la semaine (`W2026-48`). */
+export const GoalSchema = z.discriminatedUnion('scope', [
+  z.object({
+    id: z.string().regex(/^D\d{4}-\d{2}-\d{2}$/),
+    scope: z.literal('D'),
+    kind: z.enum(['blocks', 'hours', 'free']),
+    target: z.number().min(0).max(100),
+    text: goalText,
+    updatedAt: timestamp,
+  }),
+  z.object({
+    id: z.string().regex(/^W\d{4}-\d{2}$/),
+    scope: z.literal('W'),
+    kind: z.enum(['hours', 'rate', 'act']),
+    target: z.number().min(0).max(168),
+    /** Activité visée par un objectif `act`. */
+    categoryId: z.string().min(1).nullable(),
+    text: goalText,
+    updatedAt: timestamp,
+  }),
+]);
+export type Goal = z.infer<typeof GoalSchema>;
+
+/** Bilan du jour ou de la semaine, écrit par l'utilisateur ou rédigé par l'IA. */
+export const ReviewSchema = z.object({
+  id: z.string().regex(/^(D\d{4}-\d{2}-\d{2}|W\d{4}-\d{2})$/),
+  mood: z.number().int().min(1).max(5),
+  /** « Ce qui a marché ». */
+  a: z.string().max(600),
+  /** « À ajuster ». */
+  b: z.string().max(600),
+  summary: z.string().max(800),
+  ai: z.boolean(),
+  updatedAt: timestamp,
+});
+export type Review = z.infer<typeof ReviewSchema>;
+
+export const SuggestionSchema = AiSuggestion.extend({ updatedAt: timestamp });
+export type Suggestion = z.infer<typeof SuggestionSchema>;
+
 export const OptionsSchema = z.object({
   /** Réduire la transparence : surfaces pleines. */
   solid: z.boolean(),
@@ -101,6 +153,10 @@ export const SettingsSchema = z.object({
   theme: z.enum(themeNames),
   accent: z.enum(accentNames),
   options: OptionsSchema,
+  /** Trophées déjà annoncés (« Trophée débloqué : … »). */
+  trophiesSeen: z.array(z.string()).default([]),
+  /** Sessions focus terminées (trophée « Esprit clair »). */
+  focusCount: z.number().int().min(0).default(0),
   schemaVersion: z.number().int(),
   updatedAt: timestamp,
 });
@@ -129,6 +185,8 @@ export function defaultSettings(now = new Date()): Settings {
     theme: 'minuit',
     accent: 'lav',
     options: { ...DEFAULT_OPTIONS },
+    trophiesSeen: [],
+    focusCount: 0,
     schemaVersion: DB_VERSION,
     updatedAt: now.toISOString(),
   };
@@ -144,5 +202,10 @@ export const BackupSchema = z.object({
   completions: z.array(CompletionSchema),
   stepProgress: z.array(StepProgressSchema),
   restDays: z.array(RestDaySchema),
+  // Tables de la v2 : absentes d'une sauvegarde v1.
+  energy: z.array(EnergySchema).default([]),
+  goals: z.array(GoalSchema).default([]),
+  reviews: z.array(ReviewSchema).default([]),
+  suggestions: z.array(SuggestionSchema).default([]),
 });
 export type Backup = z.infer<typeof BackupSchema>;

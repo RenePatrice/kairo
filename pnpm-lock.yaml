@@ -301,6 +301,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@kairo/ai':
+        specifier: workspace:*
+        version: link:../ai
       '@kairo/core':
         specifier: workspace:*
         version: link:../core

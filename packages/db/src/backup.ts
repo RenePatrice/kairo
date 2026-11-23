@@ -14,6 +14,10 @@ export async function exportBackup(db: KairoDB, now = new Date()): Promise<Backu
     completions: await db.completions.toArray(),
     stepProgress: await db.stepProgress.toArray(),
     restDays: await db.restDays.toArray(),
+    energy: await db.energy.toArray(),
+    goals: await db.goals.toArray(),
+    reviews: await db.reviews.toArray(),
+    suggestions: await db.suggestions.toArray(),
   };
 }
 
@@ -48,5 +52,9 @@ export async function restoreBackup(db: KairoDB, backup: Backup): Promise<void> 
     await db.completions.bulkPut(backup.completions);
     await db.stepProgress.bulkPut(backup.stepProgress);
     await db.restDays.bulkPut(backup.restDays);
+    await db.energy.bulkPut(backup.energy);
+    await db.goals.bulkPut(backup.goals);
+    await db.reviews.bulkPut(backup.reviews);
+    await db.suggestions.bulkPut(backup.suggestions);
   });
 }

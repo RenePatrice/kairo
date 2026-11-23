@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BackupError, backupFileName, exportBackup, parseBackup, restoreBackup } from './backup';
 import { KairoDB } from './database';
+import { DB_VERSION } from './schema';
 import {
   addCategory,
   getSettings,
@@ -48,7 +49,7 @@ describe('sauvegarde', () => {
   it('exporte puis restaure toute la base', async () => {
     const b = await fill();
     const backup = await exportBackup(db, new Date('2026-11-22T10:00:00Z'));
-    expect(backup).toMatchObject({ app: 'kairo', schemaVersion: 1 });
+    expect(backup).toMatchObject({ app: 'kairo', schemaVersion: DB_VERSION });
     const parsed = parseBackup(JSON.stringify(backup));
     await restoreBackup(other, parsed);
     expect((await getSettings(other)).profile.name).toBe('Camille');

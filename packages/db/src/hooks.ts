@@ -1,10 +1,11 @@
 /** Lecture en direct pour les écrans (requêtes live Dexie). Les écrans ne lisent la base que par ici. */
-import type { CheckMap } from '@kairo/core';
+import type { CheckMap, EnergyMap } from '@kairo/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { createContext, useContext } from 'react';
 import type { KairoDB } from './database';
+import { readEnergy } from './progress';
 import { getSettings, listBlocks, listCategories, readChecks } from './repo';
-import type { Block, Category, Settings } from './schema';
+import type { Block, Category, Goal, Review, Settings } from './schema';
 
 export const DbContext = createContext<KairoDB | null>(null);
 
@@ -48,4 +49,27 @@ export function useStepProgress(): Readonly<Record<string, readonly number[]>> |
     for (const p of await db.stepProgress.toArray()) out[p.id] = p.done;
     return out;
   }, [db]);
+}
+
+export function useEnergy(): EnergyMap | undefined {
+  const db = useDb();
+  return useLiveQuery(() => readEnergy(db), [db]);
+}
+
+/** Objectifs par clé (`D2026-11-23`, `W2026-48`). */
+export function useGoals(): Readonly<Record<string, Goal>> | undefined {
+  const db = useDb();
+  return useLiveQuery(
+    async () => Object.fromEntries((await db.goals.toArray()).map((g) => [g.id, g])),
+    [db],
+  );
+}
+
+/** Bilans par clé (`D2026-11-23`, `W2026-48`). */
+export function useReviews(): Readonly<Record<string, Review>> | undefined {
+  const db = useDb();
+  return useLiveQuery(
+    async () => Object.fromEntries((await db.reviews.toArray()).map((r) => [r.id, r])),
+    [db],
+  );
 }
