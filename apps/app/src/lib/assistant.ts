@@ -41,6 +41,7 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { emptyActForm, useUi, type AiAction, type AiMessage, type AiSlot } from '../store';
 import { DEFAULT_REMINDER } from './actions';
+import { useBilanActions } from './bilans';
 import { useCheckIns } from './checkins';
 import { useAppData } from './data';
 import { useFormat } from './format';
@@ -64,6 +65,7 @@ export function useAssistant() {
   const energy = useMemo(() => liveEnergy ?? {}, [liveEnergy]);
   const goals = useMemo(() => liveGoals ?? {}, [liveGoals]);
   const { focus } = useCheckIns();
+  const { goalFor, reviewFor } = useBilanActions();
   const ui = useUi();
   const { settings, categories, blocks, checks, restDays, categoryOf } = data;
   const rhythm = useMemo(
@@ -363,10 +365,11 @@ export function useAssistant() {
         case 'prompt':
           return send(ac.q);
         case 'stats':
-        case 'wgoal':
-        case 'review':
-          // Les fiches Objectif et Bilan arrivent avec l'onglet Bilans (tâche 5).
           return leave('stats');
+        case 'wgoal':
+          return goalFor('W', new Date());
+        case 'review':
+          return reviewFor('D', new Date());
         case 'week':
           return leave('week');
         case 'auto':
@@ -393,7 +396,7 @@ export function useAssistant() {
         }
       }
     },
-    [send, ui, db, t, goals, blocks, history, energy, f, categoryOf],
+    [send, ui, db, t, goals, blocks, history, energy, f, categoryOf, goalFor, reviewFor],
   );
 
   return { send, apply, adjust, book, runAction, focus, weekFacts, rhythm };

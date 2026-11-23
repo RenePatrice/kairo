@@ -4,6 +4,8 @@ import { Celebration, NotificationBanner, ReminderWatcher } from '../overlays/No
 import { ActivitySheet } from '../sheets/ActivitySheet';
 import { BlockSheet } from '../sheets/BlockSheet';
 import { CopyDaySheet } from '../sheets/CopyDaySheet';
+import { GoalSheet } from '../sheets/GoalSheet';
+import { ReviewSheet } from '../sheets/ReviewSheet';
 
 /** Couches au-dessus des écrans : feuilles, focus, assistant, rappels, fête. */
 export function Overlays() {
@@ -12,6 +14,8 @@ export function Overlays() {
       <BlockSheet />
       <ActivitySheet />
       <CopyDaySheet />
+      <GoalSheet />
+      <ReviewSheet />
       <FocusMode />
       <Assistant />
       <ReminderWatcher />

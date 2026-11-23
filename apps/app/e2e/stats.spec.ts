@@ -59,6 +59,7 @@ test('état vide, puis 8 semaines de démo', async ({ page }, info) => {
 test('accessibilité des Bilans : aucune violation grave', async ({ page }) => {
   test.setTimeout(180_000);
   await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible();
   await expect(page.getByText('Régularité 7 j')).toBeVisible();
   for (const tab of ['Semaine', 'Jour', 'Trophées']) {
     await page.getByRole('group', { name: 'Bilans' }).getByRole('button', { name: tab }).click();
@@ -69,4 +70,60 @@ test('accessibilité des Bilans : aucune violation grave', async ({ page }) => {
       serious.map((v) => `${tab}: ${v.id} ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
     ).toEqual([]);
   }
+});
+
+test('bilan du jour : note obligatoire, brouillon de l’IA, puis enregistrement', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible();
+  await page.getByRole('group', { name: 'Bilans' }).getByRole('button', { name: 'Jour' }).click();
+  await page.getByRole('button', { name: /^Aujourd’hui \d+/ }).click();
+  const sheet = page.getByRole('dialog', { name: 'Bilan' });
+  await expect(sheet.getByText('Comment s’est passée ta journée ?')).toBeVisible();
+  await sheet.getByRole('button', { name: 'Enregistrer le bilan' }).click();
+  await expect(page.getByText('Choisis d’abord une note')).toBeVisible();
+  await sheet.getByRole('button', { name: 'Laisser l’IA rédiger le bilan' }).click();
+  await expect(sheet.getByText('Analyse de l’IA · modifiable')).toBeVisible();
+  await expect(sheet.getByRole('button', { name: 'Régénérer avec l’IA' })).toBeVisible();
+  await sheet.getByRole('button', { name: 'Enregistrer le bilan' }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page.getByText('Journée bouclée. À demain !')).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Aujourd’hui \d+.*✦ IA ·/ })).toBeVisible();
+});
+
+test('bilan de la semaine : le cap proposé devient l’objectif suivant', async ({ page }, info) => {
+  await page.getByRole('button', { name: 'Faire le bilan de la semaine' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Bilan' });
+  await sheet.getByRole('button', { name: 'Laisser l’IA rédiger le bilan' }).click();
+  await expect(sheet.getByLabel('Ton cap pour la semaine prochaine')).not.toHaveValue('');
+  await sheet.getByRole('button', { name: 'Top' }).click();
+  await page.screenshot({ path: `test-results/shots/${info.project.name}-review-sheet.png` });
+  await sheet.getByRole('button', { name: 'Enregistrer le bilan' }).click();
+  await expect(page.getByText('Semaine bouclée. Nouveau cap prêt.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Revoir mon bilan de la semaine' })).toBeVisible();
+});
+
+test('cap de la semaine depuis l’assistant : régularité, puis retrait', async ({ page }, info) => {
+  await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible();
+  await page.getByRole('button', { name: 'Parler à l’assistant' }).first().click();
+  const box = page.getByLabel('Message à l’assistant');
+  await box.fill('Analyse ma semaine');
+  await box.press('Enter');
+  await page.getByRole('button', { name: 'Fixer mon cap' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Objectif' });
+  await sheet.getByRole('button', { name: 'Régularité' }).click();
+  await expect(sheet.getByText('80 %')).toBeVisible();
+  await sheet.getByRole('button', { name: 'Augmenter la cible' }).click();
+  await expect(sheet.getByText('85 %')).toBeVisible();
+  await page.screenshot({ path: `test-results/shots/${info.project.name}-goal-sheet.png` });
+  await sheet.getByRole('button', { name: 'Valider le cap' }).click();
+  await expect(page.getByText('Cap de la semaine fixé')).toBeVisible();
+  await expect(sheet).toBeHidden();
+
+  await page.getByRole('button', { name: 'Fixer mon cap' }).click();
+  await expect(sheet.getByText('85 %')).toBeVisible();
+  await sheet.getByRole('button', { name: 'Retirer' }).click();
+  await expect(sheet).toBeHidden();
 });

@@ -56,6 +56,13 @@ export interface ReviewForm {
   next: string;
   summary: string;
   ai: boolean;
+  /** Cap proposé par le brouillon de l'IA (bilan de semaine), repris s'il n'est pas modifié. */
+  nextGoal: {
+    kind: 'hours' | 'rate' | 'act';
+    target: number;
+    categoryId: string | null;
+    text: string;
+  } | null;
 }
 
 export interface ToastState {

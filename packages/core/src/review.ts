@@ -95,6 +95,8 @@ export function dayReview(date: Date, input: ReviewInput, goal?: DayGoal): DayRe
 
 export interface WeekReviewFacts {
   mood: number;
+  /** Créneaux dus jusqu'à maintenant (0 : rien de prévu, la régularité n'a pas de sens). */
+  due: number;
   ratio: number;
   totalMin: number;
   /** Régularité de la semaine précédente, `null` sans donnée. */
@@ -195,6 +197,7 @@ export function weekReview(date: Date, input: ReviewInput, goal?: WeekGoal): Wee
       };
   return {
     mood: due ? moodFrom(ratio, avgEnergy) : 3,
+    due,
     ratio,
     totalMin: total,
     previousRatio: pDue ? pDone / pDue : null,

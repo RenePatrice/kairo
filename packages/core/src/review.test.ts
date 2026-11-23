@@ -70,6 +70,7 @@ describe('weekReview', () => {
     });
     expect(r).toEqual({
       mood: 5,
+      due: 14,
       ratio: 13 / 14,
       totalMin: 780,
       previousRatio: 0.5,

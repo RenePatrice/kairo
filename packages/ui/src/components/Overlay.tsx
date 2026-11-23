@@ -28,7 +28,7 @@ export function Overlay({ open, onClose, label, children, className = '' }: Over
               <motion.div
                 className={`theme-${theme} accent-${accent} ${
                   reduceMotion ? 'k-reduce-motion' : ''
-                } fixed inset-0 z-50 overflow-hidden bg-bg text-ink ${className}`}
+                } fixed inset-0 z-50 overflow-clip bg-bg text-ink ${className}`}
                 initial={reduceMotion ? { opacity: 0 } : riseIn.initial}
                 animate={riseIn.animate}
                 exit={{ opacity: 0, transition: { duration: 0.15 } }}

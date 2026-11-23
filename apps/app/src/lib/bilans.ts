@@ -175,6 +175,7 @@ export function useBilanActions() {
         next: '',
         summary: r?.summary ?? '',
         ai: r?.ai ?? false,
+        nextGoal: null,
       });
     },
     [reviews, openReview],
