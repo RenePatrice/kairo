@@ -1,7 +1,6 @@
 import { minuteOfDay, nowAndNext } from '@kairo/core';
 import {
   Dock,
-  Toast,
   ambientColors,
   breakpoints,
   riseIn,
@@ -23,6 +22,7 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { TodayScreen } from '../screens/TodayScreen';
 import { WeekScreen } from '../screens/WeekScreen';
+import { AppToast } from './AppToast';
 import { Overlays } from './Overlays';
 import { Halos } from './Halos';
 import { useUi, type Screen } from '../store';
@@ -55,8 +55,7 @@ export function Shell({ screen }: { screen: Screen }) {
   const { reduceMotion } = useAppearance();
   const { blocks, categoryOf } = useAppData();
   const desktop = useMediaQuery(`(min-width: ${breakpoints.desktop}px)`);
-  const toast = useUi((s) => s.toast);
-  const clearToast = useUi((s) => s.clearToast);
+  const assistantOpen = useUi((s) => s.assistant);
   const go = useUi((s) => s.go);
   const setAssistant = useUi((s) => s.setAssistant);
   const now = useNow(30_000);
@@ -123,16 +122,14 @@ export function Shell({ screen }: { screen: Screen }) {
         </>
       ) : null}
 
-      <Toast
-        message={toast?.message ?? null}
-        key={toast?.id}
-        onUndo={toast?.action ? () => void toast.action?.() : undefined}
-        undoLabel={toast?.actionLabel}
-        onClose={clearToast}
-        className={`pointer-events-none fixed inset-x-0 z-40 flex justify-center px-4 [&>*]:pointer-events-auto ${
-          showDock && !desktop ? 'bottom-[calc(7rem+env(safe-area-inset-bottom))]' : 'bottom-8'
-        }`}
-      />
+      {/* Pendant l'assistant, le toast vit dans sa fenêtre (le reste de la page est inerte). */}
+      {assistantOpen ? null : (
+        <AppToast
+          className={
+            showDock && !desktop ? 'bottom-[calc(7rem+env(safe-area-inset-bottom))]' : 'bottom-8'
+          }
+        />
+      )}
       <Overlays />
     </div>
   );

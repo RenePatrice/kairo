@@ -1,4 +1,5 @@
 /** État de l'interface (Zustand) : écran courant, feuilles ouvertes, toast, focus. Les données vivent dans @kairo/db. */
+import type { AiSuggestion } from '@kairo/ai';
 import { isoWeekday, type FocusSession } from '@kairo/core';
 import { activityPalette } from '@kairo/ui';
 import { create } from 'zustand';
@@ -40,6 +41,49 @@ export interface NotifState {
   lead: number;
 }
 
+/** Bouton d'action sous un message de l'assistant (maquette : `actions`). */
+export type AiAction =
+  | { kind: 'prompt'; label: string; q: string; ghost?: boolean }
+  | {
+      kind: 'stats' | 'wgoal' | 'review' | 'week' | 'auto' | 'saveReview';
+      label: string;
+      ghost?: boolean;
+    };
+
+/** Moment libre proposé (« 10:45 – 18:00 · 7 h 15 de libre · Réserver → »), heures murales. */
+export interface AiSlot {
+  startMin: number;
+  endMin: number;
+  len: string;
+  categoryId: string | null;
+}
+
+export type AiMessage =
+  | { id: string; role: 'user'; text: string }
+  | {
+      id: string;
+      role: 'ai';
+      text: string;
+      /** Proposition à valider (enregistrée « pending » dans la base). */
+      suggestion?: AiSuggestion;
+      slots?: AiSlot[];
+      actions?: AiAction[];
+    };
+
+export interface AssistantChat {
+  text: string;
+  msgs: AiMessage[];
+  thinking: boolean;
+  listening: boolean;
+}
+
+export const emptyChat = (): AssistantChat => ({
+  text: '',
+  msgs: [],
+  thinking: false,
+  listening: false,
+});
+
 export function paletteColor(index: number): string {
   const c = activityPalette[index % activityPalette.length] ?? activityPalette[0];
   return c.hex;
@@ -66,6 +110,7 @@ interface UiState {
   focusDay: string | null;
   notif: NotifState | null;
   assistant: boolean;
+  chat: AssistantChat;
   celebrateAt: number;
 
   go: (screen: Screen) => void;
@@ -83,6 +128,10 @@ interface UiState {
   setFocus: (focus: FocusSession | null, day?: string | null) => void;
   setNotif: (notif: NotifState | null) => void;
   setAssistant: (open: boolean) => void;
+  patchChat: (patch: Partial<AssistantChat>) => void;
+  pushMessages: (msgs: AiMessage[], patch?: Partial<AssistantChat>) => void;
+  patchMessage: (id: string, patch: Partial<Extract<AiMessage, { role: 'ai' }>>) => void;
+  newChat: () => void;
   celebrate: () => void;
 }
 
@@ -101,6 +150,7 @@ export const useUi = create<UiState>((set) => ({
   focusDay: null,
   notif: null,
   assistant: false,
+  chat: emptyChat(),
   celebrateAt: 0,
 
   go: (screen) => set({ screen, sheet: null }),
@@ -121,5 +171,16 @@ export const useUi = create<UiState>((set) => ({
   setFocus: (focus, focusDay = null) => set({ focus, focusDay, notif: null, sheet: null }),
   setNotif: (notif) => set({ notif }),
   setAssistant: (assistant) => set({ assistant, sheet: null }),
+  patchChat: (patch) => set((s) => ({ chat: { ...s.chat, ...patch } })),
+  pushMessages: (msgs, patch) =>
+    set((s) => ({ chat: { ...s.chat, ...patch, msgs: [...s.chat.msgs, ...msgs] } })),
+  patchMessage: (id, patch) =>
+    set((s) => ({
+      chat: {
+        ...s.chat,
+        msgs: s.chat.msgs.map((m) => (m.id === id && m.role === 'ai' ? { ...m, ...patch } : m)),
+      },
+    })),
+  newChat: () => set({ chat: emptyChat() }),
   celebrate: () => set({ celebrateAt: Date.now() }),
 }));
