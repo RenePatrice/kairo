@@ -3,6 +3,7 @@ import {
   MINUTES_PER_DAY,
   crossesMidnight,
   durationMin,
+  findClockTimes,
   formatClock,
   formatDuration,
   formatHours,
@@ -12,6 +13,24 @@ import {
   parseTime,
   toMinute,
 } from './time';
+
+describe('findClockTimes', () => {
+  it('lit les heures françaises dans l’ordre', () => {
+    expect(findClockTimes('Salle mardi et jeudi 18h-19h')).toEqual([1080, 1140]);
+    expect(findClockTimes('Lecture 22h-22h30')).toEqual([1320, 1350]);
+    expect(findClockTimes('Révisions 7 h 15 à 9:45')).toEqual([435, 585]);
+  });
+  it('lit am / pm, midi et minuit compris', () => {
+    expect(findClockTimes('Gym 6pm to 7:30 pm')).toEqual([1080, 1170]);
+    expect(findClockTimes('12am-1am')).toEqual([0, 60]);
+    expect(findClockTimes('12pm')).toEqual([720]);
+  });
+  it('ignore les heures impossibles et le texte sans heure', () => {
+    expect(findClockTimes('25h puis 10h75')).toEqual([]);
+    expect(findClockTimes('Combien d’heures cette semaine ?')).toEqual([]);
+    expect(findClockTimes('3 fois par semaine')).toEqual([]);
+  });
+});
 
 describe('normalizeMinute', () => {
   it('garde les minutes valides', () => {

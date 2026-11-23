@@ -288,7 +288,14 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0(vite@8.3.8(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.4)(yaml@2.9.1))(workbox-build@7.4.1)(workbox-window@7.4.1)
 
-  packages/ai: {}
+  packages/ai:
+    dependencies:
+      '@kairo/core':
+        specifier: workspace:*
+        version: link:../core
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   packages/core: {}
 

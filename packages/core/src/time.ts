@@ -48,6 +48,25 @@ export function parseTime(input: string): number | null {
   return hours * 60 + minutes;
 }
 
+const CLOCK_IN_TEXT_RE = /(\d{1,2})(?:\s*[h:]\s*(\d{2})?|\s*(am|pm))(?:\s*(am|pm))?/g;
+
+/**
+ * Heures citées dans une phrase, dans l'ordre (« Salle mardi 18h-19h30 » → [1080, 1170]).
+ * Même lecture que l'assistant de la maquette : « 18h », « 18:30 », « 7pm », « 7 h 15 ».
+ */
+export function findClockTimes(text: string): number[] {
+  const times: number[] = [];
+  for (const m of text.toLowerCase().matchAll(CLOCK_IN_TEXT_RE)) {
+    let hours = Number(m[1]);
+    const minutes = m[2] === undefined ? 0 : Number(m[2]);
+    const meridiem = m[3] ?? m[4];
+    if (meridiem === 'pm' && hours < 12) hours += 12;
+    if (meridiem === 'am' && hours === 12) hours = 0;
+    if (hours < 24 && minutes < 60) times.push(hours * 60 + minutes);
+  }
+  return times;
+}
+
 /** Durée entre deux heures murales ; passe minuit si besoin. Début = fin → 24 h. */
 export function durationMin(startMin: number, endMin: number): number {
   const d = normalizeMinute(endMin - startMin);
