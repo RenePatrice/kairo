@@ -1,6 +1,7 @@
 /** État de l'interface (Zustand) : écran courant, feuilles ouvertes, toast, focus. Les données vivent dans @kairo/db. */
 import type { AiSuggestion } from '@kairo/ai';
 import { isoWeekday, type FocusSession } from '@kairo/core';
+import type { PermissionState } from '@kairo/platform';
 import { activityPalette } from '@kairo/ui';
 import { create } from 'zustand';
 
@@ -156,6 +157,8 @@ interface UiState {
   recap: number | null;
   /** Créneau tout juste validé : « Bravo. Comment tu te sens après … ? ». */
   rate: { day: string; blockId: string; name: string } | null;
+  /** Autorisation des notifications système (`null` tant qu'elle n'a pas été lue). */
+  notifPermission: PermissionState | null;
   celebrateAt: number;
 
   go: (screen: Screen) => void;
@@ -184,6 +187,7 @@ interface UiState {
   patchReview: (patch: Partial<ReviewForm>) => void;
   setRecap: (index: number | null) => void;
   setRate: (rate: { day: string; blockId: string; name: string } | null) => void;
+  setNotifPermission: (permission: PermissionState) => void;
   celebrate: () => void;
 }
 
@@ -208,6 +212,7 @@ export const useUi = create<UiState>((set) => ({
   reviewForm: null,
   recap: null,
   rate: null,
+  notifPermission: null,
   celebrateAt: 0,
 
   go: (screen) => set({ screen, sheet: null }),
@@ -247,5 +252,6 @@ export const useUi = create<UiState>((set) => ({
     set((s) => (s.reviewForm ? { reviewForm: { ...s.reviewForm, ...patch } } : {})),
   setRecap: (recap) => set({ recap }),
   setRate: (rate) => set({ rate }),
+  setNotifPermission: (notifPermission) => set({ notifPermission }),
   celebrate: () => set({ celebrateAt: Date.now() }),
 }));

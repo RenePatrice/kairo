@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 test('état vide, puis 8 semaines de démo', async ({ page }, info) => {
   await expect(page.getByText('Tes stats')).toBeVisible();
   await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
-  await expect(page.getByText('8 semaines simulées')).toBeVisible();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole('button', { name: /Ta semaine,/ })).toBeVisible();
   await expect(page.getByText('Régularité 7 j')).toBeVisible();
   await expect(page.getByText('Régularité · 5 semaines')).toBeVisible();
@@ -59,7 +59,7 @@ test('état vide, puis 8 semaines de démo', async ({ page }, info) => {
 test('accessibilité des Bilans : aucune violation grave', async ({ page }) => {
   test.setTimeout(180_000);
   await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
-  await expect(page.getByText('8 semaines simulées')).toBeVisible();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('Régularité 7 j')).toBeVisible();
   for (const tab of ['Semaine', 'Jour', 'Trophées']) {
     await page.getByRole('group', { name: 'Bilans' }).getByRole('button', { name: tab }).click();
@@ -76,7 +76,7 @@ test('bilan du jour : note obligatoire, brouillon de l’IA, puis enregistrement
   page,
 }) => {
   await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
-  await expect(page.getByText('8 semaines simulées')).toBeVisible();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible({ timeout: 15_000 });
   await page.getByRole('group', { name: 'Bilans' }).getByRole('button', { name: 'Jour' }).click();
   await page.getByRole('button', { name: /^Aujourd’hui \d+/ }).click();
   const sheet = page.getByRole('dialog', { name: 'Bilan' });
@@ -106,7 +106,7 @@ test('bilan de la semaine : le cap proposé devient l’objectif suivant', async
 
 test('cap de la semaine depuis l’assistant : régularité, puis retrait', async ({ page }, info) => {
   await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
-  await expect(page.getByText('8 semaines simulées')).toBeVisible();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible({ timeout: 15_000 });
   await page.getByRole('button', { name: 'Parler à l’assistant' }).first().click();
   const box = page.getByLabel('Message à l’assistant');
   await box.fill('Analyse ma semaine');

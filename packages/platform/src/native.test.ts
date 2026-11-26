@@ -16,11 +16,14 @@ vi.mock('@capacitor/haptics', () => ({
   },
 }));
 
+vi.mock('@capacitor/local-notifications', () => ({ LocalNotifications: {} }));
+
 describe('plateforme native', () => {
   it('utilise les plugins Capacitor sur Android', async () => {
     const { detectPlatform } = await import('./native');
     const p = detectPlatform();
     expect(p.kind).toBe('android');
+    expect(p.notifications.background).toBe(true);
     await p.haptics.impact('heavy');
     await p.haptics.notify('success');
     await p.haptics.selection();

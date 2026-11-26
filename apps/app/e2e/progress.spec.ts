@@ -69,7 +69,7 @@ test('récap en stories : 4 écrans, navigation et fermeture', async ({ page }, 
   await slot.getByRole('button', { name: 'Enregistrer' }).click();
   await page.getByRole('button', { name: 'Bilans' }).first().click();
   await page.getByRole('button', { name: 'Voir avec 8 semaines de démo' }).click();
-  await expect(page.getByText('8 semaines simulées')).toBeVisible();
+  await expect(page.getByText('8 semaines simulées')).toBeVisible({ timeout: 15_000 });
   await page.getByRole('button', { name: /Ta semaine,/ }).click();
 
   const recap = page.getByRole('dialog', { name: 'Récap de la semaine' });

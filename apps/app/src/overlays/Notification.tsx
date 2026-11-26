@@ -11,6 +11,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNotifications } from '@kairo/platform';
 import { useCheckIns } from '../lib/checkins';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
@@ -23,7 +24,7 @@ const CELEBRATED_KEY = 'kairo.celebrated';
 
 /**
  * Rappels dans l'app (bannière « KAIRO · MAINTENANT ») quand l'app est ouverte, et fête
- * de la « Journée parfaite ». Les notifications système arrivent en Phase 2 via `platform`.
+ * de la « Journée parfaite ». Les notifications système sont programmées par ReminderScheduler.
  */
 export function ReminderWatcher() {
   const { settings, blocks, checks, restDays } = useAppData();
@@ -31,11 +32,15 @@ export function ReminderWatcher() {
   const celebrate = useUi((s) => s.celebrate);
   const now = useNow(15_000);
   const fired = useRef(new Set<string>());
+  const notifications = useNotifications();
+  const permission = useUi((s) => s.notifPermission);
+  // APK / iOS autorisés : les notifications système sonnent déjà, même app ouverte.
+  const systemHandles = notifications.background && permission === 'granted';
   const minute = minuteOfDay(now);
   const day = dateKey(now);
 
   useEffect(() => {
-    if (!settings.started || restDays.has(day)) return;
+    if (systemHandles || !settings.started || restDays.has(day)) return;
     const due = remindersAt(blocks, now, minute, {
       remind: settings.options.remind,
       endCheck: settings.options.endCheck,
@@ -53,7 +58,7 @@ export function ReminderWatcher() {
     }
     // `now` change toutes les 15 s ; la minute et le jour suffisent comme clés.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minute, day, blocks, checks, restDays, settings, setNotif]);
+  }, [minute, day, blocks, checks, restDays, settings, setNotif, systemHandles]);
 
   useEffect(() => {
     if (!isPerfectDay(blocks, new Date(), checks)) return;

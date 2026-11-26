@@ -8,6 +8,11 @@ export function usePlatform(): Platform {
   return useContext(PlatformContext);
 }
 
+/** Notifications (rappels) de la plateforme courante. */
+export function useNotifications(): Platform['notifications'] {
+  return useContext(PlatformContext).notifications;
+}
+
 /** Haptique de la plateforme courante. */
 export function useHaptics(): Platform['haptics'] {
   return useContext(PlatformContext).haptics;

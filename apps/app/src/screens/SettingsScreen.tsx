@@ -23,6 +23,7 @@ import {
 } from '@kairo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNotifications } from '@kairo/platform';
 import { useBilanActions } from '../lib/bilans';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
@@ -54,6 +55,8 @@ export function SettingsScreen() {
   const flash = useUi((s) => s.flash);
   const go = useUi((s) => s.go);
   const setNotif = useUi((s) => s.setNotif);
+  const setNotifPermission = useUi((s) => s.setNotifPermission);
+  const notifications = useNotifications();
   const [armed, setArmed] = useState(false);
   const armTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(armTimer.current), []);
@@ -101,11 +104,28 @@ export function SettingsScreen() {
     }
   };
 
-  const testReminder = () => {
+  /** Demande l'autorisation des notifications système, seulement si elle n'a jamais été donnée. */
+  const askPermission = async () => {
+    const current = await notifications.permission();
+    const next = current === 'prompt' ? await notifications.request() : current;
+    setNotifPermission(next);
+    return next;
+  };
+
+  const testReminder = async () => {
     const todays = occurrencesOn(blocks, now);
     const b = next?.slot ?? current?.slot ?? todays[0]?.slot ?? blocks[0];
     if (!b) return flash(t('settings.needBlock'));
-    setNotif({ kind: 'start', blockId: b.id, lead: b.reminderMin || DEFAULT_TEST_LEAD });
+    const lead = b.reminderMin || DEFAULT_TEST_LEAD;
+    setNotif({ kind: 'start', blockId: b.id, lead });
+    if ((await askPermission()) === 'granted') {
+      const name = categoryOf(b.categoryId).name;
+      await notifications.showNow({
+        id: 1,
+        title: t('notif.inMinutes', { name, n: lead }),
+        body: `${f.clock(b.startMin)} – ${f.clock(b.endMin)}`,
+      });
+    }
   };
 
   const { fillDemo } = useBilanActions();
@@ -295,6 +315,7 @@ export function SettingsScreen() {
             checked={settings.options[k]}
             onChange={(v) => {
               void updateOptions(db, { [k]: v });
+              if ((k === 'remind' || k === 'endCheck') && v) void askPermission();
               // Comme la maquette : les bilans oubliés seront rédigés par le veilleur.
               if (k === 'autoReview' && v) flash(t('announce.autoOn'));
             }}
@@ -303,7 +324,7 @@ export function SettingsScreen() {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="ghost" className="h-12 text-chip" onClick={testReminder}>
+        <Button variant="ghost" className="h-12 text-chip" onClick={() => void testReminder()}>
           {t('settings.testReminder')}
         </Button>
         <Button variant="ghost" className="h-12 text-chip" onClick={() => void fillDemo()}>

@@ -1,4 +1,4 @@
-import { PlatformContext, type Platform } from '@kairo/platform';
+import { PlatformContext, createWebNotifications, type Platform } from '@kairo/platform';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -11,6 +11,7 @@ function setup(haptic: boolean) {
   const platform: Platform = {
     kind: 'web',
     haptics: { selection, impact: vi.fn(), notify: vi.fn() },
+    notifications: createWebNotifications(null),
   };
   const onClick = vi.fn();
   render(

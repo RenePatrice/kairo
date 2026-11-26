@@ -9,6 +9,8 @@ import {
   firstCheckDay,
   newTrophies,
   parseDateKey,
+  reminderId,
+  upcomingReminders,
   weekKey,
   weekReview,
 } from '@kairo/core';
@@ -21,6 +23,7 @@ import {
   useGoals,
   useReviews,
 } from '@kairo/db';
+import { useNotifications } from '@kairo/platform';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toDayGoal, toWeekGoal, useBilans } from '../lib/bilans';
@@ -36,6 +39,7 @@ export function Watchers() {
     <>
       <AutoReviewWatcher now={now} />
       <TrophyWatcher now={now} />
+      <ReminderScheduler now={now} />
     </>
   );
 }
@@ -151,6 +155,75 @@ function TrophyWatcher({ now }: { now: Date }) {
         );
     });
   }, [key, busy, db, t]);
+
+  return null;
+}
+
+/** Reprogramme les rappels toutes les 30 min (sur le web, seuls les 24 h à venir sont minutés). */
+const RESCHEDULE_MS = 30 * 60_000;
+
+/**
+ * Rappels système des 3 prochains jours (début N minutes avant, « Fait ou raté ? » à la fin),
+ * reprogrammés à chaque changement du planning. Sur l'APK, ils sonnent même app fermée.
+ */
+function ReminderScheduler({ now }: { now: Date }) {
+  const { t } = useTranslation('app');
+  const f = useFormat();
+  const notifications = useNotifications();
+  const { settings, blocks, checks, restDays, categoryOf } = useAppData();
+  const permission = useUi((s) => s.notifPermission);
+  const setPermission = useUi((s) => s.setNotifPermission);
+  const slot = Math.floor(now.getTime() / RESCHEDULE_MS);
+  const { remind, endCheck } = settings.options;
+
+  useEffect(() => {
+    void notifications.permission().then(setPermission);
+  }, [notifications, setPermission]);
+
+  useEffect(() => {
+    if (permission !== 'granted') return;
+    const on = settings.started && (remind || endCheck);
+    const list = on
+      ? upcomingReminders(blocks, new Date(), { remind, endCheck, checks, restDays }).flatMap(
+          (r) => {
+            const block = blocks.find((b) => b.id === r.slotId);
+            if (!block) return [];
+            const name = categoryOf(block.categoryId).name;
+            return [
+              {
+                id: reminderId(r.key),
+                at: r.at,
+                title:
+                  r.kind === 'end'
+                    ? t('notif.ended', { name })
+                    : r.lead
+                      ? t('notif.inMinutes', { name, n: r.lead })
+                      : t('notif.starts', { name }),
+                body:
+                  r.kind === 'end'
+                    ? t('notif.howDidItGo')
+                    : `${f.clock(block.startMin)} – ${f.clock(block.endMin)}`,
+              },
+            ];
+          },
+        )
+      : [];
+    void notifications.schedule(list);
+    // `slot` relance la programmation toutes les 30 minutes.
+  }, [
+    permission,
+    settings.started,
+    remind,
+    endCheck,
+    blocks,
+    checks,
+    restDays,
+    categoryOf,
+    notifications,
+    t,
+    f,
+    slot,
+  ]);
 
   return null;
 }
