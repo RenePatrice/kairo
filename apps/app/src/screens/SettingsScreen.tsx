@@ -1,7 +1,10 @@
 import { minuteOfDay, nowAndNext, occurrencesOn } from '@kairo/core';
 import {
   accentNames,
+  backupFileName,
   exportBackup,
+  parseBackup,
+  restoreBackup,
   resetAll,
   themeNames,
   updateOptions,
@@ -23,7 +26,7 @@ import {
 } from '@kairo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNotifications } from '@kairo/platform';
+import { useFiles, useNotifications } from '@kairo/platform';
 import { useBilanActions } from '../lib/bilans';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
@@ -57,6 +60,8 @@ export function SettingsScreen() {
   const setNotif = useUi((s) => s.setNotif);
   const setNotifPermission = useUi((s) => s.setNotifPermission);
   const notifications = useNotifications();
+  const files = useFiles();
+  const restoreInput = useRef<HTMLInputElement>(null);
   const [armed, setArmed] = useState(false);
   const armTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(armTimer.current), []);
@@ -129,6 +134,33 @@ export function SettingsScreen() {
   };
 
   const { fillDemo } = useBilanActions();
+
+  /** Fichier de sauvegarde : téléchargé (navigateur) ou partagé (téléphone : Drive, mail…). */
+  const saveBackupFile = async () => {
+    const data = JSON.stringify(await exportBackup(db), null, 2);
+    const result = await files.saveText(
+      backupFileName(),
+      data,
+      'application/json',
+      t('settings.backupTitle'),
+    );
+    if (result === 'saved') flash(t('settings.backupSaved'));
+    else if (result === 'failed') flash(t('settings.backupFailed'));
+  };
+
+  /** Restaure un fichier choisi ; « Annuler » remet les données d'avant pendant 5 s. */
+  const restoreFile = async (file: File | undefined) => {
+    if (!file) return;
+    let backup;
+    try {
+      backup = parseBackup(await file.text());
+    } catch {
+      return flash(t('settings.backupInvalid'));
+    }
+    const before = await exportBackup(db);
+    await restoreBackup(db, backup);
+    flash(t('settings.restored'), t('common.undo'), () => restoreBackup(db, before));
+  };
 
   const reset = async () => {
     if (!armed) {
@@ -334,6 +366,30 @@ export function SettingsScreen() {
       <Button variant="ghost" className="h-12 text-chip" onClick={() => void exportData()}>
         {t('settings.export')}
       </Button>
+      <div className="grid grid-cols-2 gap-2">
+        <Button variant="ghost" className="h-12 text-chip" onClick={() => void saveBackupFile()}>
+          {t('settings.saveBackup')}
+        </Button>
+        <Button
+          variant="ghost"
+          className="h-12 text-chip"
+          onClick={() => restoreInput.current?.click()}
+        >
+          {t('settings.restoreBackup')}
+        </Button>
+      </div>
+      <input
+        ref={restoreInput}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        aria-label={t('settings.restoreBackup')}
+        onChange={(e) => {
+          void restoreFile(e.target.files?.[0]);
+          e.target.value = '';
+        }}
+      />
+      <p className="m-0 text-caption leading-normal text-ink3">{t('settings.backupHint')}</p>
       <Button variant="danger" className="h-12" onClick={() => void reset()}>
         {armed ? t('settings.resetArm') : t('settings.reset')}
       </Button>

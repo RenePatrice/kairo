@@ -4,6 +4,7 @@
  */
 import { Capacitor } from '@capacitor/core';
 import { Haptics as NativeHaptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { createNativeFiles } from './files';
 import { createNativeNotifications } from './nativeNotifications';
 import { createNativeSpeech } from './speech';
 import type { Haptics, Platform } from './types';
@@ -37,5 +38,6 @@ export function detectPlatform(): Platform {
     haptics: createNativeHaptics(),
     notifications: createNativeNotifications(),
     speech: createNativeSpeech(),
+    files: createNativeFiles(),
   };
 }

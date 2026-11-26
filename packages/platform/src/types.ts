@@ -54,9 +54,21 @@ export interface Speech {
   stop(): Promise<void>;
 }
 
+export type SaveResult = 'saved' | 'shared' | 'cancelled' | 'failed';
+
+/** Fichiers : enregistrer une sauvegarde hors de l'app. */
+export interface Files {
+  /**
+   * Enregistre un fichier texte : téléchargement (navigateur) ou menu Partager (téléphone).
+   * `title` sert de titre au menu Partager.
+   */
+  saveText(name: string, text: string, mime?: string, title?: string): Promise<SaveResult>;
+}
+
 export interface Platform {
   kind: PlatformKind;
   haptics: Haptics;
   notifications: Notifications;
   speech: Speech;
+  files: Files;
 }

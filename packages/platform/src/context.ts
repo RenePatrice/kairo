@@ -13,6 +13,11 @@ export function useNotifications(): Platform['notifications'] {
   return useContext(PlatformContext).notifications;
 }
 
+/** Fichiers (sauvegarde) de la plateforme courante. */
+export function useFiles(): Platform['files'] {
+  return useContext(PlatformContext).files;
+}
+
 /** Dictée vocale de la plateforme courante. */
 export function useSpeech(): Platform['speech'] {
   return useContext(PlatformContext).speech;
