@@ -5,6 +5,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Haptics as NativeHaptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { createNativeNotifications } from './nativeNotifications';
+import { createNativeSpeech } from './speech';
 import type { Haptics, Platform } from './types';
 import { createWebPlatform } from './web';
 
@@ -31,5 +32,10 @@ export function createNativeHaptics(): Haptics {
 export function detectPlatform(): Platform {
   if (!Capacitor.isNativePlatform()) return createWebPlatform();
   const kind = Capacitor.getPlatform() === 'ios' ? 'ios' : 'android';
-  return { kind, haptics: createNativeHaptics(), notifications: createNativeNotifications() };
+  return {
+    kind,
+    haptics: createNativeHaptics(),
+    notifications: createNativeNotifications(),
+    speech: createNativeSpeech(),
+  };
 }

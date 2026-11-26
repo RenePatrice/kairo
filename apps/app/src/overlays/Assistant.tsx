@@ -1,5 +1,5 @@
 import type { AiSuggestion } from '@kairo/ai';
-import { durationMin, greetingFor, minuteOfDay } from '@kairo/core';
+import { durationMin, greetingFor, minuteOfDay, stableRandom } from '@kairo/core';
 import {
   Button,
   GlassSurface,
@@ -15,7 +15,8 @@ import {
   withAlpha,
 } from '@kairo/ui';
 import { motion } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { useSpeech } from '@kairo/platform';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAssistant, useInsights } from '../lib/assistant';
 import { useAppData } from '../lib/data';
@@ -26,6 +27,13 @@ import { useUi, type AiMessage } from '../store';
 
 type AiReply = Extract<AiMessage, { role: 'ai' }>;
 type Assistant = ReturnType<typeof useAssistant>;
+
+/** Onde du micro (maquette : 18 barres, hauteurs et vitesses variées, toujours les mêmes). */
+const WAVE = Array.from({ length: 18 }, (_, i) => ({
+  key: i,
+  h: 8 + Math.round(stableRandom(`w${i}`) * 22),
+  d: Number((0.35 + stableRandom(`d${i}`) * 0.5).toFixed(2)),
+}));
 
 const tile = (key: string) => activityPalette.find((c) => c.key === key)?.hex ?? status.success;
 
@@ -42,6 +50,25 @@ export function Assistant() {
   const now = useNow(30_000);
   const scroller = useRef<HTMLDivElement>(null);
   const { reduceMotion } = useAppearance();
+  const f = useFormat();
+  const speech = useSpeech();
+  const [canSpeak, setCanSpeak] = useState(false);
+
+  useEffect(() => {
+    void speech.available().then(setCanSpeak);
+  }, [speech]);
+
+  /** Micro : écoute une phrase et la place dans le champ, à relire avant d'envoyer. */
+  const mic = async () => {
+    if (useUi.getState().chat.listening) {
+      await speech.stop();
+      patchChat({ listening: false });
+      return;
+    }
+    patchChat({ listening: true });
+    const heard = await speech.listen(f.locale);
+    patchChat({ listening: false, ...(heard ? { text: heard } : {}) });
+  };
 
   useEffect(() => {
     const el = scroller.current;
@@ -147,15 +174,19 @@ export function Assistant() {
             ))}
           </div>
           <GlassSurface level="thick" className="flex items-center gap-2 rounded-pill p-1.5">
-            {/* La voix arrive avec platform.speech (tâche 7). */}
-            <button
-              type="button"
-              disabled
-              aria-label={t('assistant.micStart')}
-              className="flex size-11.5 flex-none items-center justify-center rounded-pill bg-track text-ink opacity-50"
-            >
-              <Icon name="mic" size={18} />
-            </button>
+            {canSpeak ? (
+              <Pressable
+                haptic
+                onClick={() => void mic()}
+                aria-label={chat.listening ? t('assistant.micStop') : t('assistant.micStart')}
+                aria-pressed={chat.listening}
+                className={`flex size-11.5 flex-none items-center justify-center rounded-pill ${
+                  chat.listening ? 'bg-acc text-acc-ink' : 'bg-track text-ink'
+                }`}
+              >
+                <Icon name="mic" size={18} />
+              </Pressable>
+            ) : null}
             <form
               className="flex min-w-0 flex-1 items-center gap-2"
               onSubmit={(e) => {
@@ -163,14 +194,33 @@ export function Assistant() {
                 assistant.send();
               }}
             >
-              <input
-                value={chat.text}
-                onChange={(e) => patchChat({ text: e.target.value })}
-                aria-label={t('assistant.message')}
-                placeholder={t('assistant.placeholder')}
-                enterKeyHint="send"
-                className="h-11 min-w-0 flex-1 bg-transparent text-input text-ink outline-none placeholder:text-ink3"
-              />
+              {chat.listening ? (
+                <div
+                  className="flex h-11 min-w-0 flex-1 items-center gap-0.75 px-1.5"
+                  role="status"
+                >
+                  {WAVE.map((w) => (
+                    <span
+                      key={w.key}
+                      aria-hidden="true"
+                      className="flex-1 animate-wave rounded-xs bg-acc"
+                      style={{ height: w.h, animationDuration: `${w.d}s` }}
+                    />
+                  ))}
+                  <span className="ml-2 whitespace-nowrap font-serif text-input italic text-ink2">
+                    {t('assistant.listening')}
+                  </span>
+                </div>
+              ) : (
+                <input
+                  value={chat.text}
+                  onChange={(e) => patchChat({ text: e.target.value })}
+                  aria-label={t('assistant.message')}
+                  placeholder={t('assistant.placeholder')}
+                  enterKeyHint="send"
+                  className="h-11 min-w-0 flex-1 bg-transparent text-input text-ink outline-none placeholder:text-ink3"
+                />
+              )}
               <Pressable
                 type="submit"
                 aria-label={t('assistant.send')}

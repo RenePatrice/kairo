@@ -39,8 +39,24 @@ export interface Notifications {
   showNow(reminder: Omit<ScheduledReminder, 'at'>): Promise<void>;
 }
 
+export type SpeechLocale = 'fr' | 'en';
+
+/** Dictée d'une phrase pour l'assistant (micro de la barre de saisie). */
+export interface Speech {
+  /** Reconnaissance vocale disponible sur cet appareil / navigateur. */
+  available(): Promise<boolean>;
+  /**
+   * Écoute une phrase et renvoie le texte reconnu, ou `null` (rien entendu, arrêté, micro refusé).
+   * L'autorisation du micro est demandée à ce moment-là, jamais au lancement.
+   */
+  listen(locale: SpeechLocale): Promise<string | null>;
+  /** Arrête l'écoute en cours. */
+  stop(): Promise<void>;
+}
+
 export interface Platform {
   kind: PlatformKind;
   haptics: Haptics;
   notifications: Notifications;
+  speech: Speech;
 }

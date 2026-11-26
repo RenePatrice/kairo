@@ -125,3 +125,49 @@ test('accessibilité de l’assistant : aucune violation grave', async ({ page }
     serious.map((v) => `${v.id} ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);
 });
+
+test.describe('dictée', () => {
+  test.beforeEach(async ({ page }) => {
+    // Rechargement avec une fausse reconnaissance vocale : elle « entend » une phrase après 600 ms.
+    await page.addInitScript(() => {
+      function FakeRecognition(this: Record<string, unknown>) {
+        this.start = () => {
+          window.setTimeout(() => {
+            const onresult = this.onresult as ((e: unknown) => void) | null;
+            onresult?.({ results: [[{ transcript: 'Salle jeudi 7h-8h' }]] });
+            (this.onend as (() => void) | null)?.();
+          }, 600);
+        };
+        this.stop = () => (this.onend as (() => void) | null)?.();
+      }
+      for (const k of ['SpeechRecognition', 'webkitSpeechRecognition']) {
+        Object.defineProperty(window, k, { value: FakeRecognition, configurable: true });
+      }
+    });
+    await page.reload();
+    await page.getByRole('button', { name: 'Parler à l’assistant' }).first().click();
+  });
+
+  test('la phrase dictée arrive dans le champ, puis devient une proposition', async ({ page }) => {
+    const dlg = assistant(page);
+    await dlg.getByRole('button', { name: 'Parler à l’assistant' }).click();
+    await expect(dlg.getByText('J’écoute…')).toBeVisible();
+    await expect(dlg.getByRole('button', { name: 'Arrêter l’écoute' })).toBeVisible();
+    await expect(dlg.getByLabel('Message à l’assistant')).toHaveValue('Salle jeudi 7h-8h');
+    await dlg.getByLabel('Message à l’assistant').press('Enter');
+    await expect(dlg.getByText(/Je cale ça dans « Salle »/)).toBeVisible();
+  });
+});
+
+test('sans reconnaissance vocale, le micro est masqué', async ({ page }) => {
+  await page.addInitScript(() => {
+    for (const k of ['SpeechRecognition', 'webkitSpeechRecognition']) {
+      Object.defineProperty(window, k, { value: undefined, configurable: true });
+    }
+  });
+  await page.reload();
+  await page.getByRole('button', { name: 'Parler à l’assistant' }).first().click();
+  const dlg = assistant(page);
+  await expect(dlg.getByLabel('Message à l’assistant')).toBeVisible();
+  await expect(dlg.getByRole('button', { name: 'Parler à l’assistant' })).toHaveCount(0);
+});

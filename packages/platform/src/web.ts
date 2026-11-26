@@ -1,4 +1,5 @@
 import type { Haptics, ImpactStyle, NotificationFeedback, Platform } from './types';
+import { createWebSpeech } from './speech';
 import { createWebNotifications } from './webNotifications';
 
 /** Motifs de vibration (ms) pour les navigateurs qui la supportent (Chrome Android). */
@@ -33,7 +34,12 @@ function defaultVibrate(): Vibrate | null {
 }
 
 export function createWebPlatform(): Platform {
-  return { kind: 'web', haptics: createWebHaptics(), notifications: createWebNotifications() };
+  return {
+    kind: 'web',
+    haptics: createWebHaptics(),
+    notifications: createWebNotifications(),
+    speech: createWebSpeech(),
+  };
 }
 
 /** Haptique muette (réglage « vibrations » désactivé). */

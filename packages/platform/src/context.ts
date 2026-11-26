@@ -13,6 +13,11 @@ export function useNotifications(): Platform['notifications'] {
   return useContext(PlatformContext).notifications;
 }
 
+/** Dictée vocale de la plateforme courante. */
+export function useSpeech(): Platform['speech'] {
+  return useContext(PlatformContext).speech;
+}
+
 /** Haptique de la plateforme courante. */
 export function useHaptics(): Platform['haptics'] {
   return useContext(PlatformContext).haptics;
