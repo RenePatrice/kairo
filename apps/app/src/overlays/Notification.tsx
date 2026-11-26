@@ -101,7 +101,9 @@ export function NotificationBanner() {
         ? t('notif.howDidItGo')
         : `${f.clock(block.startMin)} – ${f.clock(block.endMin)}`;
     const check = (status: 'done' | 'missed') => async () => {
-      await setCheck(db, dateKey(new Date()), block.id, status);
+      const day = dateKey(new Date());
+      await setCheck(db, day, block.id, status);
+      if (status === 'done') useUi.getState().setRate({ day, blockId: block.id, name: cat.name });
       setNotif(null);
       go('today');
     };

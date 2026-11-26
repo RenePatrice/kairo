@@ -39,3 +39,28 @@ export async function noHorizontalOverflow(page: Page) {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 }
+
+/**
+ * Attend la fin des transitions avant une analyse axe : le contraste d'un texte en plein fondu
+ * serait faussé. Couvre les animations CSS finies (les boucles décoratives sont ignorées) et les
+ * ressorts de Motion, qui modifient l'opacité et la transformation en ligne : on attend que ces
+ * styles ne bougent plus entre deux relevés espacés de 200 ms.
+ */
+export async function settle(page: Page) {
+  await page.waitForFunction(
+    () => {
+      const w = window as unknown as { __kairoMotion?: string };
+      const signature = [...document.querySelectorAll<HTMLElement>('[style]')]
+        .map((el) => `${el.style.opacity}|${el.style.transform}`)
+        .join(';');
+      const stable = w.__kairoMotion === signature;
+      w.__kairoMotion = signature;
+      const cssDone = document
+        .getAnimations()
+        .every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity);
+      return stable && cssDone;
+    },
+    undefined,
+    { polling: 200 },
+  );
+}

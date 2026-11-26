@@ -16,6 +16,7 @@ import { useSheetActions } from '../lib/actions';
 import { useNow } from '../lib/useNow';
 import { useUi } from '../store';
 import { Agenda } from './week/Agenda';
+import { WeekGoal } from './week/WeekGoal';
 import { WeekSummary } from './week/WeekSummary';
 import { WideWeek } from './week/WideWeek';
 
@@ -198,6 +199,8 @@ export function WeekScreen() {
           {t('today.addShort')}
         </Button>
       </div>
+
+      <WeekGoal now={now} />
 
       {wide ? (
         <div className="flex flex-col gap-4">

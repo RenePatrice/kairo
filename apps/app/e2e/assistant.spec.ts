@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { noHorizontalOverflow, onboard } from './helpers';
+import { noHorizontalOverflow, onboard, settle } from './helpers';
 
 test.setTimeout(90_000);
 
@@ -118,6 +118,7 @@ test('accessibilité de l’assistant : aucune violation grave', async ({ page }
   test.setTimeout(180_000);
   await ask(page, 'Salle jeudi 7h-8h');
   await expect(assistant(page).getByRole('button', { name: 'Ajuster' })).toBeVisible();
+  await settle(page);
   const { violations } = await new AxeBuilder({ page }).analyze();
   const serious = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
   expect(

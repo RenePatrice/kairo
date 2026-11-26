@@ -28,6 +28,8 @@ import { useSheetActions } from '../lib/actions';
 import { useNow } from '../lib/useNow';
 import { useUi } from '../store';
 import { Dial } from './today/Dial';
+import { EnergyRate } from './today/EnergyRate';
+import { TodayGoals } from './today/TodayGoals';
 
 const GOAL_RING = 2 * Math.PI * 26;
 
@@ -184,6 +186,8 @@ export function TodayScreen() {
           </GlassSurface>
         ) : null}
 
+        <TodayGoals now={now} />
+
         {!blocks.length ? (
           <GlassSurface className="flex flex-col gap-3.5 rounded-panel p-5.5">
             <span className="text-title font-bold tracking-snug">
@@ -251,6 +255,7 @@ export function TodayScreen() {
                 {t('today.focus')}
               </Button>
             ) : null}
+            <EnergyRate />
           </>
         )}
       </div>

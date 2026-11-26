@@ -32,8 +32,13 @@ export function useCheckIns() {
     async (o: Occurrence<Block>) => {
       await setCheck(db, o.day, o.slot.id, 'done');
       void haptics.notify('success');
+      useUi.getState().setRate({
+        day: o.day,
+        blockId: o.slot.id,
+        name: categoryOf(o.slot.categoryId).name,
+      });
     },
-    [db, haptics],
+    [db, haptics, categoryOf],
   );
 
   const undo = useCallback((o: Occurrence<Block>) => setCheck(db, o.day, o.slot.id, null), [db]);

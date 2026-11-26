@@ -293,7 +293,11 @@ export function SettingsScreen() {
             name={t(`settings.options.${k}.name`)}
             description={t(`settings.options.${k}.desc`)}
             checked={settings.options[k]}
-            onChange={(v) => void updateOptions(db, { [k]: v })}
+            onChange={(v) => {
+              void updateOptions(db, { [k]: v });
+              // Comme la maquette : les bilans oubliés seront rédigés par le veilleur.
+              if (k === 'autoReview' && v) flash(t('announce.autoOn'));
+            }}
           />
         ))}
       </div>

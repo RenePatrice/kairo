@@ -132,13 +132,14 @@ export function goalText(
   goal: { kind: string; target: number; text: string; categoryId?: string | null },
   t: TFunction<'app'>,
   nameOf: (categoryId: string) => string,
+  scope: 'D' | 'W' = 'D',
 ): string {
   if (goal.text) return goal.text;
   switch (goal.kind) {
     case 'blocks':
       return t('goal.textBlocks', { count: goal.target });
     case 'hours':
-      return t('goal.textHours', { n: goal.target });
+      return t(scope === 'W' ? 'goal.textWeekHours' : 'goal.textHours', { n: goal.target });
     case 'rate':
       return t('goal.textRate', { n: goal.target });
     case 'act':

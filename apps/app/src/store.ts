@@ -154,6 +154,8 @@ interface UiState {
   reviewForm: ReviewForm | null;
   /** Récap en stories ouvert (index de l'écran), ou `null`. */
   recap: number | null;
+  /** Créneau tout juste validé : « Bravo. Comment tu te sens après … ? ». */
+  rate: { day: string; blockId: string; name: string } | null;
   celebrateAt: number;
 
   go: (screen: Screen) => void;
@@ -181,6 +183,7 @@ interface UiState {
   openReview: (form: ReviewForm) => void;
   patchReview: (patch: Partial<ReviewForm>) => void;
   setRecap: (index: number | null) => void;
+  setRate: (rate: { day: string; blockId: string; name: string } | null) => void;
   celebrate: () => void;
 }
 
@@ -204,6 +207,7 @@ export const useUi = create<UiState>((set) => ({
   goalForm: null,
   reviewForm: null,
   recap: null,
+  rate: null,
   celebrateAt: 0,
 
   go: (screen) => set({ screen, sheet: null }),
@@ -242,5 +246,6 @@ export const useUi = create<UiState>((set) => ({
   patchReview: (patch) =>
     set((s) => (s.reviewForm ? { reviewForm: { ...s.reviewForm, ...patch } } : {})),
   setRecap: (recap) => set({ recap }),
+  setRate: (rate) => set({ rate }),
   celebrate: () => set({ celebrateAt: Date.now() }),
 }));

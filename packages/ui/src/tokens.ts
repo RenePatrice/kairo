@@ -178,6 +178,18 @@ export const recap = {
     'radial-gradient(120% 90% at 100% 0%, rgba(255,195,160,.55) 0%, transparent 45%), radial-gradient(90% 80% at 0% 100%, rgba(143,168,255,.55) 0%, transparent 55%), linear-gradient(140deg, #1C1846 0%, #33205E 45%, #5A2652 100%)',
   ink: '#FFFFFF',
   accent: '#FFE1F3',
+  /** Fonds des écrans du récap (stories). */
+  slideWeek:
+    'radial-gradient(90% 60% at 100% 0%, rgba(255,195,160,.35), transparent 60%), linear-gradient(165deg, #1C1846, #3A2266 55%, #62284F)',
+  /** Écran « Ton point fort » : fond sombre teinté par la couleur de l'activité. */
+  slideStrongBase: '#0B1022',
+  slideRate:
+    'radial-gradient(90% 60% at 0% 0%, rgba(158,227,210,.30), transparent 60%), linear-gradient(165deg, #0A2026, #123A40 55%, #1E2D5A)',
+  slideNext:
+    'radial-gradient(90% 60% at 100% 0%, rgba(255,195,160,.35), transparent 60%), linear-gradient(165deg, #2A1A12, #5A3420 55%, #3E2050)',
+  /** Bouton blanc du dernier écran. */
+  ctaBg: '#FFFFFF',
+  ctaInk: '#0B0D18',
 } as const;
 
 /** Couleurs de statut. */

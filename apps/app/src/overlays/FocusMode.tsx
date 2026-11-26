@@ -7,7 +7,7 @@ import {
   splitDuration,
   tickPomodoro,
 } from '@kairo/core';
-import { setCheck, toggleStep, useDb } from '@kairo/db';
+import { countFocusSession, setCheck, toggleStep, useDb } from '@kairo/db';
 import {
   Button,
   GlassSurface,
@@ -77,7 +77,13 @@ export function FocusMode() {
     const done = day && block ? (steps[checkKey(day, block.id)] ?? []) : [];
 
     const finish = async () => {
-      if (block && day) await setCheck(db, day, block.id, 'done');
+      if (block && day) {
+        await setCheck(db, day, block.id, 'done');
+        await countFocusSession(db);
+        useUi
+          .getState()
+          .setRate({ day, blockId: block.id, name: categoryOf(block.categoryId).name });
+      }
       setFocus(null);
       useUi.getState().go('today');
     };

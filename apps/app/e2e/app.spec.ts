@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { addSlot, noHorizontalOverflow, onboard } from './helpers';
+import { addSlot, noHorizontalOverflow, onboard, settle } from './helpers';
 
 test.setTimeout(60_000);
 
@@ -69,8 +69,8 @@ test('accessibilité : aucune violation grave', async ({ page }) => {
   await onboard(page);
   await addSlot(page, { steps: -36 });
   for (const tab of ['Semaine', 'Aujourd’hui', 'Réglages']) {
-    await page.getByRole('button', { name: tab }).first().click();
-    await page.waitForTimeout(400);
+    await page.getByRole('button', { name: tab, exact: true }).first().click();
+    await settle(page);
     const { violations } = await new AxeBuilder({ page }).analyze();
     const serious = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
     expect(
