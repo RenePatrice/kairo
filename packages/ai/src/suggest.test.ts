@@ -59,15 +59,46 @@ describe('planSuggestion (carte de la maquette)', () => {
 
   it('avertit d’un chevauchement et d’un créneau pendant le sommeil', () => {
     expect(plan('Piano mardi 18h30-19h30').warnings).toEqual([
-      { code: 'overlap', op: 1, names: ['Salle'] },
+      { code: 'overlap', op: 1, names: ['Salle'], days: [] },
     ]);
-    expect(plan('Lecture samedi 2h-3h').warnings).toEqual([{ code: 'in_sleep', op: 0, names: [] }]);
+    // 2 h – 3 h le samedi : commence pendant le sommeil et raccourcit la nuit de vendredi (6 h 30).
+    expect(plan('Lecture samedi 2h-3h').warnings).toEqual([
+      { code: 'in_sleep', op: 0, names: [], days: [] },
+      { code: 'short_sleep', op: 0, names: [], days: [4] },
+    ]);
   });
 
   it('recycle la palette quand il y a plus d’activités que de couleurs', () => {
     const ctx = makeContext({ palette: ['#111111', '#222222'] });
     const s = plan('Piano lundi 17h', ctx);
     expect(s.operations[0]).toMatchObject({ category: { color: '#222222' } });
+  });
+});
+
+describe('alertes de charge', () => {
+  it('signale une journée surchargée que la proposition crée', () => {
+    const s = plan('Gardes lundi 6h-23h');
+    expect(s.warnings).toContainEqual({ code: 'overload', op: 1, names: [], days: [0] });
+  });
+
+  it('signale une nuit de moins de 7 h créée par la proposition', () => {
+    const s = plan('Veille samedi 23h-1h');
+    expect(s.warnings.find((w) => w.code === 'short_sleep')).toEqual({
+      code: 'short_sleep',
+      op: 1,
+      names: [],
+      days: [5],
+    });
+  });
+
+  it('ne répète pas une alerte qui existait déjà', () => {
+    const ctx = makeContext({
+      blocks: [
+        ...makeContext().blocks,
+        { id: 'big', categoryId: 'c-rev', days: [0], startMin: 360, endMin: 1430 },
+      ],
+    });
+    expect(plan('Salle lundi 7h-8h', ctx).warnings.map((w) => w.code)).not.toContain('overload');
   });
 });
 
@@ -208,7 +239,7 @@ describe('resolveLlmReply', () => {
       makeContext(),
       'server',
     );
-    expect(suggestion?.warnings).toEqual([{ code: 'overlap', op: 3, names: ['Piano'] }]);
+    expect(suggestion?.warnings).toEqual([{ code: 'overlap', op: 3, names: ['Piano'], days: [] }]);
   });
 
   it('vérifie le déplacement contre les autres créneaux', () => {
@@ -221,6 +252,8 @@ describe('resolveLlmReply', () => {
       makeContext(),
       'server',
     );
-    expect(suggestion?.warnings).toEqual([{ code: 'overlap', op: 0, names: ['Révisions'] }]);
+    expect(suggestion?.warnings).toEqual([
+      { code: 'overlap', op: 0, names: ['Révisions'], days: [] },
+    ]);
   });
 });

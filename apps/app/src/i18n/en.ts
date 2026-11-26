@@ -51,6 +51,10 @@ export const en: AppStrings = {
     me: 'Settings',
     assistant: 'Talk to the assistant',
   },
+  splash: {
+    loading: 'Loading Kairo',
+    signature: 'René Patrice · Copyright © {{year}}',
+  },
   lang: {
     prompt: 'Choisis ta langue · Choose your language',
     fr: { name: 'Français', sub: 'Interface en français' },
@@ -64,6 +68,7 @@ export const en: AppStrings = {
       'Nurse, student, craftsperson, coach, parent… You build your plan. Kairo reminds you what to do, keeps you in the flow and shows your progress.',
     name: 'Your first name',
     namePh: 'Alex',
+    nameRequired: 'Enter your first name to continue',
     role: 'What you do · optional',
     rolePh: 'Night nurse, law student…',
   },
@@ -336,6 +341,8 @@ export const en: AppStrings = {
       gone: 'This slot changed in the meantime: I didn’t change anything. Ask me again.',
       warnOverlap: 'Overlaps {{names}}',
       warnSleep: 'This slot starts while you sleep.',
+      warnOverload: 'Overloaded day: {{days}}',
+      warnShortSleep: 'Under 7 h of sleep: {{days}}',
     },
     insight: {
       nowTag: 'NOW',

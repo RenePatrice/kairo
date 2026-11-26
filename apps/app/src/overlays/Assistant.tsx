@@ -437,11 +437,20 @@ function PlanCard({
   const b = add.block;
   const applied = suggestion.status === 'applied';
   const when = b.once ? b.once : f.daysText(b.days);
-  const warnings = suggestion.warnings.map((w) =>
-    w.code === 'overlap'
-      ? t('assistant.reply.warnOverlap', { names: w.names.join(' · ') })
-      : t('assistant.reply.warnSleep'),
-  );
+  const dayList = (days: readonly number[]) =>
+    days.map((d) => f.dayName(d).slice(0, 3)).join(' · ');
+  const warnings = suggestion.warnings.map((w) => {
+    switch (w.code) {
+      case 'overlap':
+        return t('assistant.reply.warnOverlap', { names: w.names.join(' · ') });
+      case 'in_sleep':
+        return t('assistant.reply.warnSleep');
+      case 'overload':
+        return t('assistant.reply.warnOverload', { days: dayList(w.days) });
+      case 'short_sleep':
+        return t('assistant.reply.warnShortSleep', { days: dayList(w.days) });
+    }
+  });
 
   return (
     <GlassSurface

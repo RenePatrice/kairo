@@ -8,6 +8,7 @@ import { appResources } from './i18n';
 import { useAppData } from './lib/data';
 import { DataProvider } from './lib/DataProvider';
 import { Shell } from './shell/Shell';
+import { Splash } from './shell/Splash';
 import { useUi } from './store';
 
 const browserLocale: AppLocale = navigator.language.toLowerCase().startsWith('en') ? 'en' : 'fr';
@@ -32,6 +33,7 @@ export function App() {
           <DataProvider fallback={null}>
             <Root />
           </DataProvider>
+          <Splash />
         </DbContext.Provider>
       )}
     </I18nextProvider>
@@ -42,6 +44,10 @@ function Root() {
   const { settings } = useAppData();
   const screen = useUi((s) => s.screen);
   const go = useUi((s) => s.go);
+  const setDataReady = useUi((s) => s.setDataReady);
+
+  // La base est lue (Root ne s'affiche qu'après) : l'écran de chargement peut s'effacer.
+  useEffect(() => setDataReady(), [setDataReady]);
 
   // Premier écran : la langue, puis l'accueil, ou Aujourd'hui si le programme existe déjà.
   useEffect(() => {

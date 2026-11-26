@@ -7,7 +7,10 @@ import {
   draftOverlaps,
   durationMin,
   isAsleep,
+  overloadedDays,
   parseTime,
+  shortSleepDays,
+  startOfWeek,
   validateSlot,
   type SlotError,
 } from '@kairo/core';
@@ -122,10 +125,33 @@ export function suggestionWarnings(
     const overlaps = draftOverlaps(slot, [...others, ...earlier]);
     if (overlaps.length) {
       const names = [...new Set(overlaps.map((x) => nameOf(x.slot.categoryId)))].filter(Boolean);
-      warnings.push({ code: 'overlap', op: i, names });
+      warnings.push({ code: 'overlap', op: i, names, days: [] });
     }
-    if (isAsleep(slot.startMin, ctx.rhythm)) warnings.push({ code: 'in_sleep', op: i, names: [] });
+    if (isAsleep(slot.startMin, ctx.rhythm)) {
+      warnings.push({ code: 'in_sleep', op: i, names: [], days: [] });
+    }
   });
+
+  // Alertes de la semaine en cours que la proposition ferait apparaître (déjà là avant : rien).
+  const firstChange = ops.findIndex((o) => o.op === 'add' || o.op === 'update');
+  if (firstChange >= 0) {
+    const after = [...planned, ...ops.flatMap((o) => (o.op === 'add' ? [o.block] : []))];
+    const week = startOfWeek(ctx.now);
+    const fresh = (before: number[], now: number[]) => now.filter((d) => !before.includes(d));
+    const overload = fresh(
+      overloadedDays(ctx.blocks, week, ctx.rhythm),
+      overloadedDays(after, week, ctx.rhythm),
+    );
+    const shortSleep = fresh(
+      shortSleepDays(ctx.blocks, week, ctx.rhythm),
+      shortSleepDays(after, week, ctx.rhythm),
+    );
+    if (overload.length)
+      warnings.push({ code: 'overload', op: firstChange, names: [], days: overload });
+    if (shortSleep.length) {
+      warnings.push({ code: 'short_sleep', op: firstChange, names: [], days: shortSleep });
+    }
+  }
   return warnings;
 }
 

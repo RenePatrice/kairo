@@ -1,13 +1,16 @@
 import { motion } from 'motion/react';
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { useAppearance } from '../appearance/context';
 import { GlassSurface } from '../glass/GlassSurface';
 import { Pressable, type PressableProps } from '../motion/Pressable';
 import { transitionFor } from '../motion/transitions';
 import { inkOnColor } from '../tokens';
 
-/** Champ texte de la maquette : 54 px, bord fin, halo d'accent au focus. */
-export function Field({ className = '', ...rest }: InputHTMLAttributes<HTMLInputElement>) {
+/**
+ * Champ texte de la maquette : 54 px, bord fin, halo d'accent au focus.
+ * Accepte une `ref` (React 19) pour donner le focus.
+ */
+export function Field({ className = '', ...rest }: ComponentPropsWithRef<'input'>) {
   return (
     <input
       className={`h-13.5 w-full rounded-field border border-line bg-card px-4 text-input text-ink outline-none transition-shadow placeholder:text-ink3 focus:border-acc focus:shadow-[0_0_0_4px_color-mix(in_oklab,var(--k-acc)_25%,transparent)] ${className}`}

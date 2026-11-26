@@ -104,11 +104,17 @@ export type SuggestionOperation = z.infer<typeof SuggestionOperation>;
 
 /** Avertissements calculés par `core` (jamais par le modèle). */
 export const SuggestionWarning = z.object({
-  code: z.enum(['overlap', 'in_sleep']),
+  /**
+   * `overlap` : chevauche d'autres créneaux ; `in_sleep` : commence pendant le sommeil ;
+   * `overload` : journée plus remplie que le temps d'éveil ; `short_sleep` : nuit de moins de 7 h.
+   */
+  code: z.enum(['overlap', 'in_sleep', 'overload', 'short_sleep']),
   /** Index de l'opération concernée. */
   op: z.number().int().min(0),
   /** Activités chevauchées, pour « Chevauche Salle (mar.) ». */
   names: z.array(z.string()),
+  /** Jours de la semaine touchés (lundi = 0), pour la surcharge et le sommeil. */
+  days: z.array(z.number().int().min(0).max(6)).default([]),
 });
 export type SuggestionWarning = z.infer<typeof SuggestionWarning>;
 

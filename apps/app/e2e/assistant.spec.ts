@@ -89,6 +89,13 @@ test('repère une nouvelle activité et ouvre « Ajuster » dans la fiche créne
   expect(await liveBlocks(page)).toBe(0);
 });
 
+test('alerte une journée surchargée avant validation', async ({ page }) => {
+  await ask(page, 'Gardes lundi 6h-23h');
+  const dlg = assistant(page);
+  await expect(dlg.getByText(/Journée surchargée : Lun/)).toBeVisible();
+  await expect(dlg.getByRole('button', { name: 'Ajouter', exact: true })).toBeVisible();
+});
+
 test('moments libres : « Réserver → » ouvre un créneau ponctuel', async ({ page }) => {
   await ask(page, 'Mes moments libres');
   const dlg = assistant(page);

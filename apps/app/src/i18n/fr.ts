@@ -65,6 +65,10 @@ export const fr = {
     me: 'Réglages',
     assistant: 'Parler à l’assistant',
   },
+  splash: {
+    loading: 'Chargement de Kairo',
+    signature: 'René Patrice · Copyright © {{year}}',
+  },
   lang: {
     prompt: 'Choisis ta langue · Choose your language',
     fr: { name: 'Français', sub: 'Interface en français' },
@@ -78,6 +82,7 @@ export const fr = {
       'Soignant, étudiant, artisan, coach, parent… Tu construis ton programme. Kairo te rappelle quoi faire, te garde dans le flow et te montre ta progression.',
     name: 'Ton prénom',
     namePh: 'Camille',
+    nameRequired: 'Écris ton prénom pour continuer',
     role: 'Ce que tu fais · facultatif',
     rolePh: 'Infirmière de nuit, étudiant en droit…',
   },
@@ -352,6 +357,8 @@ export const fr = {
       gone: 'Ce créneau a changé entre-temps : je n’ai rien modifié. Redemande-moi.',
       warnOverlap: 'Chevauche {{names}}',
       warnSleep: 'Ce créneau commence pendant ton sommeil.',
+      warnOverload: 'Journée surchargée : {{days}}',
+      warnShortSleep: 'Moins de 7 h de sommeil : {{days}}',
     },
     insight: {
       nowTag: 'EN COURS',

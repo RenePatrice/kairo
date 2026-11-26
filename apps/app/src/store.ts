@@ -159,6 +159,8 @@ interface UiState {
   rate: { day: string; blockId: string; name: string } | null;
   /** Autorisation des notifications système (`null` tant qu'elle n'a pas été lue). */
   notifPermission: PermissionState | null;
+  /** Base locale lue : l'écran de chargement peut s'effacer. */
+  dataReady: boolean;
   celebrateAt: number;
 
   go: (screen: Screen) => void;
@@ -188,6 +190,7 @@ interface UiState {
   setRecap: (index: number | null) => void;
   setRate: (rate: { day: string; blockId: string; name: string } | null) => void;
   setNotifPermission: (permission: PermissionState) => void;
+  setDataReady: () => void;
   celebrate: () => void;
 }
 
@@ -213,6 +216,7 @@ export const useUi = create<UiState>((set) => ({
   recap: null,
   rate: null,
   notifPermission: null,
+  dataReady: false,
   celebrateAt: 0,
 
   go: (screen) => set({ screen, sheet: null }),
@@ -253,5 +257,6 @@ export const useUi = create<UiState>((set) => ({
   setRecap: (recap) => set({ recap }),
   setRate: (rate) => set({ rate }),
   setNotifPermission: (notifPermission) => set({ notifPermission }),
+  setDataReady: () => set({ dataReady: true }),
   celebrate: () => set({ celebrateAt: Date.now() }),
 }));
