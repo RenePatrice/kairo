@@ -2,6 +2,7 @@ import {
   PlatformContext,
   createWebNotifications,
   createWebFiles,
+  webBack,
   createWebSpeech,
   type Platform,
 } from '@kairo/platform';
@@ -20,6 +21,7 @@ function setup(haptic: boolean) {
     notifications: createWebNotifications(null),
     speech: createWebSpeech(null),
     files: createWebFiles(null),
+    back: webBack,
   };
   const onClick = vi.fn();
   render(

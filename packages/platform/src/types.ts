@@ -65,10 +65,21 @@ export interface Files {
   saveText(name: string, text: string, mime?: string, title?: string): Promise<SaveResult>;
 }
 
+/** Bouton Retour du téléphone. */
+export interface Back {
+  /**
+   * Écoute le bouton Retour. `handler` ferme ce qui est ouvert et renvoie `true`, ou `false`
+   * s'il n'y avait rien à fermer (l'app passe alors en arrière-plan). Renvoie de quoi arrêter.
+   */
+  onBack(handler: () => boolean): () => void;
+  minimize(): Promise<void>;
+}
+
 export interface Platform {
   kind: PlatformKind;
   haptics: Haptics;
   notifications: Notifications;
   speech: Speech;
   files: Files;
+  back: Back;
 }

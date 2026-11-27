@@ -4,12 +4,13 @@
  * avertissements calculés. Rien n'est écrit en base ici.
  */
 import {
-  draftOverlaps,
+  dateKey,
   durationMin,
   isAsleep,
   overloadedDays,
   parseTime,
   shortSleepDays,
+  slotConflicts,
   startOfWeek,
   validateSlot,
   type SlotError,
@@ -122,7 +123,8 @@ export function suggestionWarnings(
       .slice(0, i)
       .flatMap((p) => (p.op === 'add' ? [p.block] : []))
       .filter((b) => b.id !== slot.id);
-    const overlaps = draftOverlaps(slot, [...others, ...earlier]);
+    // Horaire déjà pris (créneaux ponctuels passés ignorés) : la proposition sera bloquée.
+    const overlaps = slotConflicts(slot, [...others, ...earlier], dateKey(ctx.now));
     if (overlaps.length) {
       const names = [...new Set(overlaps.map((x) => nameOf(x.slot.categoryId)))].filter(Boolean);
       warnings.push({ code: 'overlap', op: i, names, days: [] });

@@ -20,6 +20,7 @@ vi.mock('@capacitor/local-notifications', () => ({ LocalNotifications: {} }));
 vi.mock('@capacitor-community/speech-recognition', () => ({ SpeechRecognition: {} }));
 vi.mock('@capacitor/filesystem', () => ({ Filesystem: {}, Directory: {}, Encoding: {} }));
 vi.mock('@capacitor/share', () => ({ Share: {} }));
+vi.mock('@capacitor/app', () => ({ App: {} }));
 
 describe('plateforme native', () => {
   it('utilise les plugins Capacitor sur Android', async () => {

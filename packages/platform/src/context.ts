@@ -13,6 +13,11 @@ export function useNotifications(): Platform['notifications'] {
   return useContext(PlatformContext).notifications;
 }
 
+/** Bouton Retour du téléphone. */
+export function useBack(): Platform['back'] {
+  return useContext(PlatformContext).back;
+}
+
 /** Fichiers (sauvegarde) de la plateforme courante. */
 export function useFiles(): Platform['files'] {
   return useContext(PlatformContext).files;

@@ -1,5 +1,7 @@
 import {
-  draftOverlaps,
+  dateKey,
+  nextFreeStart,
+  slotConflicts,
   durationMin,
   isAsleep,
   normalizeMinute,
@@ -34,24 +36,33 @@ export function BlockSheet() {
   if (!form) return null;
   const length = durationMin(form.startMin, form.endMin);
   const rhythm = { wakeMin: settings.profile.wakeMin, sleepMin: settings.profile.sleepMin };
-  const overlaps = draftOverlaps({ ...form, id: form.id ?? '' }, blocks);
-  const warning = overlaps.length
-    ? t('block.overlap', {
-        list: overlaps
+  // Un horaire déjà pris est refusé (plus de chevauchement) ; on propose le prochain libre.
+  const today = dateKey(new Date());
+  const draft = { ...form, id: form.id ?? '' };
+  const conflicts = slotConflicts(draft, blocks, today);
+  const taken = conflicts.length
+    ? t('block.taken', {
+        list: conflicts
           .map(
-            (o) =>
-              `${categoryOf(o.slot.categoryId).name} (${o.sharedDays.map((d) => f.dayName(d).slice(0, 3)).join(', ')})`,
+            (c) =>
+              `${categoryOf(c.slot.categoryId).name} (${c.days.map((d) => f.dayName(d).slice(0, 3)).join(', ')})`,
           )
           .join(' · '),
       })
-    : form.reminderMin !== null && isAsleep(reminderMinute(form.startMin, form.reminderMin), rhythm)
+    : '';
+  const freeStart = conflicts.length ? nextFreeStart(draft, blocks, today) : null;
+  const warning =
+    !taken &&
+    form.reminderMin !== null &&
+    isAsleep(reminderMinute(form.startMin, form.reminderMin), rhythm)
       ? t('block.sleepWarn')
       : '';
-  const valid = Boolean(form.categoryId) && (Boolean(form.once) || form.days.length > 0);
+  const valid = Boolean(form.categoryId) && (Boolean(form.once) || form.days.length > 0) && !taken;
 
   const save = async () => {
     if (!form.categoryId) return flash(t('block.pickActivity'));
     if (!form.once && !form.days.length) return flash(t('block.pickDay'));
+    if (taken) return flash(t('block.pickFree'));
     const pending = form.stepInput.trim();
     const saved = await saveBlock(db, {
       id: form.id,
@@ -320,6 +331,27 @@ export function BlockSheet() {
           })}
         </div>
       </section>
+
+      {taken ? (
+        <div
+          role="alert"
+          className="flex items-center gap-2.5 rounded-step bg-danger/14 px-3 py-2.5 text-small font-medium text-alert"
+        >
+          <span className="flex-1">{taken}</span>
+          {freeStart !== null ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="flex-none"
+              onClick={() =>
+                patch({ startMin: freeStart, endMin: normalizeMinute(freeStart + length) })
+              }
+            >
+              {t('block.takeFree', { time: f.clock(freeStart) })}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       {warning ? (
         <div

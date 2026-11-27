@@ -6,3 +6,4 @@ export * from './webNotifications';
 export * from './nativeNotifications';
 export * from './speech';
 export * from './files';
+export * from './back';

@@ -1,4 +1,5 @@
 import type { Haptics, ImpactStyle, NotificationFeedback, Platform } from './types';
+import { webBack } from './back';
 import { createWebFiles } from './files';
 import { createWebSpeech } from './speech';
 import { createWebNotifications } from './webNotifications';
@@ -41,6 +42,7 @@ export function createWebPlatform(): Platform {
     notifications: createWebNotifications(),
     speech: createWebSpeech(),
     files: createWebFiles(),
+    back: webBack,
   };
 }
 

@@ -81,7 +81,7 @@ export const fr = {
     intro:
       'Soignant, étudiant, artisan, coach, parent… Tu construis ton programme. Kairo te rappelle quoi faire, te garde dans le flow et te montre ta progression.',
     name: 'Ton prénom',
-    namePh: 'Camille',
+    namePh: 'René',
     nameRequired: 'Écris ton prénom pour continuer',
     role: 'Ce que tu fais · facultatif',
     rolePh: 'Infirmière de nuit, étudiant en droit…',
@@ -240,6 +240,9 @@ export const fr = {
     remOnTime: 'À l’heure',
     remMin: '{{n}} min',
     overlap: 'Chevauche {{list}}',
+    taken: 'Horaire déjà pris : {{list}}',
+    takeFree: 'Prendre {{time}}',
+    pickFree: 'Choisis un horaire libre',
     sleepWarn: 'Ce rappel tomberait pendant ton sommeil.',
     pickActivity: 'Choisis une activité',
     pickDay: 'Choisis au moins un jour',
@@ -355,7 +358,7 @@ export const fr = {
       needsModel:
         'Je ne sais pas encore composer ça seul. Décris-le créneau par créneau, par exemple « Salle mardi 18h-19h ».',
       gone: 'Ce créneau a changé entre-temps : je n’ai rien modifié. Redemande-moi.',
-      warnOverlap: 'Chevauche {{names}}',
+      warnOverlap: 'Horaire déjà pris : {{names}}',
       warnSleep: 'Ce créneau commence pendant ton sommeil.',
       warnOverload: 'Journée surchargée : {{days}}',
       warnShortSleep: 'Moins de 7 h de sommeil : {{days}}',

@@ -23,7 +23,7 @@ import {
   useGoals,
   useReviews,
 } from '@kairo/db';
-import { useNotifications } from '@kairo/platform';
+import { useBack, useNotifications } from '@kairo/platform';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toDayGoal, toWeekGoal, useBilans } from '../lib/bilans';
@@ -40,6 +40,7 @@ export function Watchers() {
       <AutoReviewWatcher now={now} />
       <TrophyWatcher now={now} />
       <ReminderScheduler now={now} />
+      <BackButton />
     </>
   );
 }
@@ -225,5 +226,35 @@ function ReminderScheduler({ now }: { now: Date }) {
     slot,
   ]);
 
+  return null;
+}
+
+/** Écran précédent de l'accueil, pour le bouton Retour. */
+const ONBOARDING_BACK = { rhythm: 'welcome', acts: 'rhythm' } as const;
+
+/**
+ * Bouton Retour d'Android : ferme d'abord la fiche, puis l'écran plein (récap, focus,
+ * assistant), la bannière, revient à l'étape ou à l'onglet Aujourd'hui ; sinon l'app passe en
+ * arrière-plan (elle ne se ferme pas).
+ */
+function BackButton() {
+  const back = useBack();
+  useEffect(
+    () =>
+      back.onBack(() => {
+        const ui = useUi.getState();
+        if (ui.sheet) ui.closeSheet();
+        else if (ui.recap !== null) ui.setRecap(null);
+        else if (ui.focus) ui.setFocus(null);
+        else if (ui.assistant) ui.setAssistant(false);
+        else if (ui.notif) ui.setNotif(null);
+        else if (ui.screen === 'rhythm' || ui.screen === 'acts') ui.go(ONBOARDING_BACK[ui.screen]);
+        else if (ui.screen === 'week' || ui.screen === 'stats' || ui.screen === 'me')
+          ui.go('today');
+        else return false;
+        return true;
+      }),
+    [back],
+  );
   return null;
 }

@@ -436,6 +436,8 @@ function PlanCard({
   const cat = created?.op === 'add_category' ? created.category : categoryOf(add.block.categoryId);
   const b = add.block;
   const applied = suggestion.status === 'applied';
+  // Pas de chevauchement : une proposition sur un horaire déjà pris ne peut être qu'ajustée.
+  const blocked = suggestion.warnings.some((w) => w.code === 'overlap');
   const when = b.once ? b.once : f.daysText(b.days);
   const dayList = (days: readonly number[]) =>
     days.map((d) => f.dayName(d).slice(0, 3)).join(' · ');
@@ -490,6 +492,7 @@ function PlanCard({
           <Button
             className="flex-1"
             size="sm"
+            disabled={blocked}
             onClick={() => void assistant.apply(msgId, suggestion)}
           >
             {t('assistant.add')}

@@ -226,6 +226,9 @@ export const en: AppStrings = {
     remOnTime: 'On time',
     remMin: '{{n}} min',
     overlap: 'Overlaps {{list}}',
+    taken: 'Time already taken: {{list}}',
+    takeFree: 'Take {{time}}',
+    pickFree: 'Pick a free time',
     sleepWarn: 'This reminder would go off while you sleep.',
     pickActivity: 'Pick an activity',
     pickDay: 'Pick at least one day',
@@ -339,7 +342,7 @@ export const en: AppStrings = {
       needsModel:
         'I can’t build that on my own yet. Describe it one slot at a time, for example “Gym Tuesday 6pm-7pm”.',
       gone: 'This slot changed in the meantime: I didn’t change anything. Ask me again.',
-      warnOverlap: 'Overlaps {{names}}',
+      warnOverlap: 'Time already taken: {{names}}',
       warnSleep: 'This slot starts while you sleep.',
       warnOverload: 'Overloaded day: {{days}}',
       warnShortSleep: 'Under 7 h of sleep: {{days}}',

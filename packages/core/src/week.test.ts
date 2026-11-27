@@ -76,6 +76,18 @@ describe('semaine', () => {
     expect(recurringOn(slots, 5)).toBe(0);
   });
 
+  it('ne copie pas sur un jour où l’horaire est déjà pris', () => {
+    const day: Slot[] = [
+      { id: 'a', days: [0], startMin: 600, endMin: 660 },
+      { id: 'b', days: [2], startMin: 630, endMin: 690 },
+    ];
+    const out = copyDay(day, 0, [1, 2]);
+    expect(out[0]?.days).toEqual([0, 1]);
+    expect(out[1]).toBe(day[1]);
+    // Déjà présent sur tous les jours cibles : rien ne change.
+    expect(copyDay(day, 0, [0])[0]).toBe(day[0]);
+  });
+
   it('signale les chevauchements sur des jours communs', () => {
     const draft: Slot = { id: 'n', days: [1, 5], startMin: 690, endMin: 750 };
     expect(draftOverlaps(draft, slots)).toEqual([{ slot: slots[0], sharedDays: [1] }]);

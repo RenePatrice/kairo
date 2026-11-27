@@ -78,3 +78,33 @@ test('accessibilité : aucune violation grave', async ({ page }) => {
     ).toEqual([]);
   }
 });
+
+test('une fiche ouverte se ferme sans rien modifier', async ({ page }) => {
+  await onboard(page);
+  await addSlot(page);
+  await page
+    .getByRole('button', { name: /^Salle.*18:00/ })
+    .first()
+    .click();
+  const sheet = page.getByRole('dialog', { name: 'Modifier le créneau' });
+  await sheet.getByRole('button', { name: 'Début plus tard' }).click();
+  await sheet.getByRole('button', { name: 'Fermer' }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole('button', { name: /^Salle.*18:00/ }).first()).toBeVisible();
+});
+
+test('un horaire déjà pris est refusé, le prochain libre est proposé', async ({ page }) => {
+  await onboard(page);
+  await addSlot(page);
+  await page.getByRole('button', { name: '+ Créneau' }).first().click();
+  const sheet = page.getByRole('dialog', { name: 'Nouveau créneau' });
+  await expect(sheet.getByRole('alert')).toContainText('Horaire déjà pris : Salle (Lun)');
+  await sheet.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByText('Choisis un horaire libre')).toBeVisible();
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole('button', { name: 'Prendre 19:00' }).click();
+  await expect(sheet.getByRole('alert')).toHaveCount(0);
+  await sheet.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole('button', { name: /^Salle.*19:00/ }).first()).toBeVisible();
+});

@@ -2,6 +2,7 @@
  * Calculs de l'écran Semaine de la maquette : charge par jour, fenêtre horaire de la vue
  * d'ensemble, répartition par activité, copie d'un jour, chevauchements et créneau libre.
  */
+import { slotConflicts } from './conflicts';
 import { addDays } from './dates';
 import { awakeMinutes, ceilQuarter, dayAnchor, type Rhythm } from './rhythm';
 import { occursOn, type Slot } from './schedule';
@@ -110,17 +111,26 @@ export function weekMinutesFor<S extends Slot>(
   return weekLoads(slots.filter(match), weekStart).reduce((a, b) => a + b, 0);
 }
 
-/** « Copier un jour » : ajoute les jours cibles aux créneaux récurrents du jour source. */
+/**
+ * « Copier un jour » : ajoute les jours cibles aux créneaux récurrents du jour source, sauf
+ * là où le créneau chevaucherait un horaire déjà pris (pas de chevauchement).
+ */
 export function copyDay<S extends Slot>(
   slots: readonly S[],
   source: number,
   targets: readonly number[],
 ): S[] {
-  return slots.map((s) => {
-    if (s.once || !s.days.includes(source)) return s;
-    const days = [...new Set([...s.days, ...targets])].sort((a, b) => a - b);
-    return { ...s, days };
+  const out = [...slots];
+  out.forEach((s, i) => {
+    if (s.once || !s.days.includes(source)) return;
+    const others = out.filter((_, j) => j !== i);
+    const free = targets.filter(
+      (d) => !s.days.includes(d) && !slotConflicts({ ...s, days: [d] }, others).length,
+    );
+    if (!free.length) return;
+    out[i] = { ...s, days: [...new Set([...s.days, ...free])].sort((a, b) => a - b) };
   });
+  return out;
 }
 
 /** Nombre de créneaux récurrents du jour (ceux que « Copier un jour » dupliquera). */

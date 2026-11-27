@@ -87,8 +87,8 @@ export function Sheet({
                     aria-hidden="true"
                     className="mx-auto h-1.25 w-10 flex-none rounded-pill bg-line"
                   />
-                  <header className="flex items-baseline justify-between gap-3">
-                    <div className="flex flex-col gap-1">
+                  <header className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-col gap-1">
                       <Dialog.Title className="headline text-display">{title}</Dialog.Title>
                       {description ? (
                         <Dialog.Description className="m-0 text-small text-ink2">
@@ -96,17 +96,19 @@ export function Sheet({
                         </Dialog.Description>
                       ) : null}
                     </div>
-                    {aside ? (
-                      <span className="mono-num text-caption text-ink3">{aside}</span>
-                    ) : null}
+                    <div className="flex flex-none items-center gap-2 pt-1">
+                      {aside ? (
+                        <span className="mono-num text-caption text-ink3">{aside}</span>
+                      ) : null}
+                      {/* Toujours visible : sur téléphone, une fiche haute ne laisse pas de fond à toucher. */}
+                      <Dialog.Close
+                        aria-label={t('common.close')}
+                        className="flex size-11 items-center justify-center rounded-pill border border-line bg-card text-ink2"
+                      >
+                        <Icon name="close" size={18} />
+                      </Dialog.Close>
+                    </div>
                   </header>
-                  {/* La maquette ferme en touchant le fond ; ce bouton sert au clavier et aux lecteurs d'écran. */}
-                  <Dialog.Close
-                    aria-label={t('common.close')}
-                    className="sr-only flex size-11 items-center justify-center rounded-pill border border-line bg-card text-ink2 focus-visible:not-sr-only focus-visible:absolute focus-visible:right-4 focus-visible:top-4"
-                  >
-                    <Icon name="close" size={18} />
-                  </Dialog.Close>
                   {children}
                 </GlassSurface>
               </motion.div>

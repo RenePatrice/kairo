@@ -14,3 +14,4 @@ export * from './stats';
 export * from './review';
 export * from './trophies';
 export * from './load';
+export * from './conflicts';
