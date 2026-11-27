@@ -28,6 +28,7 @@ export type SheetKind =
   | 'account'
   | 'moneyCategory'
   | 'recurring'
+  | 'savings'
   | null;
 export type StatTab = 'day' | 'week' | 'trophy';
 
@@ -97,6 +98,18 @@ export interface RecurringForm {
   startDate: string;
   note: string;
   active: boolean;
+}
+
+/** Fiche Objectif d'épargne du Budget. */
+export interface SavingsForm {
+  id: string | null;
+  name: string;
+  target: string;
+  /** Date visée (AAAA-MM-JJ) ou vide. */
+  deadline: string;
+  accountId: string | null;
+  saved: string;
+  color: string;
 }
 
 /** Fiche Objectif (maquette : `gf`). */
@@ -227,6 +240,7 @@ interface UiState {
   accountForm: AccountForm | null;
   moneyCategoryForm: MoneyCategoryForm | null;
   recurringForm: RecurringForm | null;
+  savingsForm: SavingsForm | null;
   /** Récap en stories ouvert (index de l'écran), ou `null`. */
   recap: number | null;
   /** Créneau tout juste validé : « Bravo. Comment tu te sens après … ? ». */
@@ -270,6 +284,8 @@ interface UiState {
   patchMoneyCategory: (patch: Partial<MoneyCategoryForm>) => void;
   openRecurring: (form: RecurringForm) => void;
   patchRecurring: (patch: Partial<RecurringForm>) => void;
+  openSavings: (form: SavingsForm) => void;
+  patchSavings: (patch: Partial<SavingsForm>) => void;
   setRate: (rate: { day: string; blockId: string; name: string } | null) => void;
   setNotifPermission: (permission: PermissionState) => void;
   setDataReady: () => void;
@@ -300,6 +316,7 @@ export const useUi = create<UiState>((set) => ({
   accountForm: null,
   moneyCategoryForm: null,
   recurringForm: null,
+  savingsForm: null,
   rate: null,
   notifPermission: null,
   dataReady: false,
@@ -349,6 +366,9 @@ export const useUi = create<UiState>((set) => ({
       s.moneyCategoryForm ? { moneyCategoryForm: { ...s.moneyCategoryForm, ...patch } } : {},
     ),
   openRecurring: (recurringForm) => set({ sheet: 'recurring', recurringForm }),
+  openSavings: (savingsForm) => set({ sheet: 'savings', savingsForm }),
+  patchSavings: (patch) =>
+    set((s) => (s.savingsForm ? { savingsForm: { ...s.savingsForm, ...patch } } : {})),
   patchRecurring: (patch) =>
     set((s) => (s.recurringForm ? { recurringForm: { ...s.recurringForm, ...patch } } : {})),
   patchAccount: (patch) =>

@@ -14,6 +14,7 @@ import { amountInput, useBudget, useMoneyActions } from '../../lib/budget';
 import { useFormat } from '../../lib/format';
 import { useNow } from '../../lib/useNow';
 import { useUi } from '../../store';
+import { SavingsGoals } from './SavingsGoals';
 import { TransactionRow } from './TransactionRow';
 
 const RECENT = 5;
@@ -196,6 +197,8 @@ export function BudgetHome() {
           })}
         </GlassSurface>
       ) : null}
+
+      <SavingsGoals />
 
       <section className="flex flex-col gap-2" aria-label={t('budget.home.recent')}>
         <div className="flex items-baseline justify-between">

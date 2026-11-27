@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createWebNotifications,
+  REMINDER_GRACE_MS,
   WEB_MAX_DELAY_MS,
   type WebNotificationEnv,
 } from './webNotifications';
@@ -58,7 +59,7 @@ describe('notifications web', () => {
     const { env, timers, shown } = fakeEnv();
     const n = createWebNotifications(env);
     await n.schedule([
-      { id: 1, at: at(-5), title: 'passé', body: '' },
+      { id: 1, at: at(-REMINDER_GRACE_MS - 1), title: 'trop tard', body: '' },
       { id: 2, at: at(60_000), title: 'Salle dans 10 min', body: '18:00 – 19:00' },
       { id: 3, at: at(WEB_MAX_DELAY_MS + 1), title: 'trop loin', body: '' },
     ]);
@@ -67,6 +68,17 @@ describe('notifications web', () => {
     expect(shown).toEqual(['Salle dans 10 min — 18:00 – 19:00']);
     await n.schedule([]);
     expect(timers.size).toBe(0);
+  });
+
+  it('montre tout de suite un rappel en retard de moins de 2 min, une seule fois', async () => {
+    const { env, timers, shown } = fakeEnv();
+    const n = createWebNotifications(env);
+    const late = { id: 4, at: at(-30_000), title: 'Loyer demain', body: '' };
+    await n.schedule([late]);
+    expect(shown).toEqual(['Loyer demain — ']);
+    expect(timers.size).toBe(0);
+    await n.schedule([late]);
+    expect(shown).toHaveLength(1);
   });
 
   it('au premier plan, laisse la bannière de l’app ; sans autorisation, ne montre rien', async () => {
@@ -111,8 +123,12 @@ describe('notifications natives', () => {
     expect(n.background).toBe(true);
     expect(await n.permission()).toBe('granted');
     pending.push({ id: 7 });
-    const when = new Date('2026-11-23T16:50:00Z');
-    await n.schedule([{ id: 1, at: when, title: 'Salle dans 10 min', body: '18:00 – 19:00' }]);
+    const when = new Date(Date.now() + 3_600_000);
+    const past = new Date(Date.now() - 60_000);
+    await n.schedule([
+      { id: 1, at: when, title: 'Salle dans 10 min', body: '18:00 – 19:00' },
+      { id: 9, at: past, title: 'déjà montré', body: '' },
+    ]);
     expect(plugin.cancelled).toEqual([{ notifications: [{ id: 7 }] }]);
     expect(plugin.scheduled).toEqual([
       {

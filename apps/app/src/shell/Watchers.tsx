@@ -5,7 +5,9 @@
 import {
   addDays,
   autoReviewsDue,
+  atMinute,
   dateKey,
+  upcomingDue,
   dayReview,
   firstCheckDay,
   newTrophies,
@@ -25,9 +27,10 @@ import {
   useGoals,
   useReviews,
 } from '@kairo/db';
-import { useBack, useNotifications } from '@kairo/platform';
+import { REMINDER_GRACE_MS, useBack, useNotifications } from '@kairo/platform';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBudget } from '../lib/budget';
 import { toDayGoal, toWeekGoal, useBilans } from '../lib/bilans';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
@@ -163,6 +166,9 @@ function TrophyWatcher({ now }: { now: Date }) {
   return null;
 }
 
+/** Heure du rappel d'échéance du Budget, la veille (18:00). */
+const DUE_REMINDER_MIN = 18 * 60;
+
 /** Reprogramme les rappels toutes les 30 min (sur le web, seuls les 24 h à venir sont minutés). */
 const RESCHEDULE_MS = 30 * 60_000;
 
@@ -179,6 +185,9 @@ function ReminderScheduler({ now }: { now: Date }) {
   const setPermission = useUi((s) => s.setNotifPermission);
   const slot = Math.floor(now.getTime() / RESCHEDULE_MS);
   const { remind, endCheck } = settings.options;
+  // Données stables seulement : l'objet renvoyé par useBudget change à chaque rendu, et
+  // reprogrammer toutes les notifications à chaque rendu serait coûteux sur le téléphone.
+  const { recurrings, money, categoryOf: moneyCategoryOf } = useBudget();
 
   useEffect(() => {
     void notifications.permission().then(setPermission);
@@ -188,31 +197,55 @@ function ReminderScheduler({ now }: { now: Date }) {
     if (permission !== 'granted') return;
     const on = settings.started && (remind || endCheck);
     const list = on
-      ? upcomingReminders(blocks, new Date(), { remind, endCheck, checks, restDays }).flatMap(
-          (r) => {
-            const block = blocks.find((b) => b.id === r.slotId);
-            if (!block) return [];
-            const name = categoryOf(block.categoryId).name;
+      ? upcomingReminders(blocks, new Date(Date.now() - REMINDER_GRACE_MS), {
+          remind,
+          endCheck,
+          checks,
+          restDays,
+        }).flatMap((r) => {
+          const block = blocks.find((b) => b.id === r.slotId);
+          if (!block) return [];
+          const name = categoryOf(block.categoryId).name;
+          return [
+            {
+              id: reminderId(r.key),
+              at: r.at,
+              title:
+                r.kind === 'end'
+                  ? t('notif.ended', { name })
+                  : r.lead
+                    ? t('notif.inMinutes', { name, n: r.lead })
+                    : t('notif.starts', { name }),
+              body:
+                r.kind === 'end'
+                  ? t('notif.howDidItGo')
+                  : `${f.clock(block.startMin)} – ${f.clock(block.endMin)}`,
+            },
+          ];
+        })
+      : [];
+    // Budget : « Loyer demain : 450,00 € », la veille à 18 h, pour les 3 prochains jours.
+    const today = dateKey(new Date());
+    const dues =
+      remind && settings.currency
+        ? upcomingDue(recurrings, today, 3).flatMap((d) => {
+            const r = recurrings.find((x) => x.id === d.recurringId);
+            const at = atMinute(addDays(parseDateKey(d.date), -1), DUE_REMINDER_MIN);
+            if (!r || at.getTime() <= Date.now() - REMINDER_GRACE_MS) return [];
             return [
               {
-                id: reminderId(r.key),
-                at: r.at,
-                title:
-                  r.kind === 'end'
-                    ? t('notif.ended', { name })
-                    : r.lead
-                      ? t('notif.inMinutes', { name, n: r.lead })
-                      : t('notif.starts', { name }),
-                body:
-                  r.kind === 'end'
-                    ? t('notif.howDidItGo')
-                    : `${f.clock(block.startMin)} – ${f.clock(block.endMin)}`,
+                id: reminderId(`due|${d.recurringId}|${d.date}`),
+                at,
+                title: t('budget.dueTomorrow', {
+                  name: r.note || moneyCategoryOf(r.categoryId)?.name || '',
+                  amount: money(r.amountCents),
+                }),
+                body: t('budget.dueBody'),
               },
             ];
-          },
-        )
-      : [];
-    void notifications.schedule(list);
+          })
+        : [];
+    void notifications.schedule([...list, ...dues]);
     // `slot` relance la programmation toutes les 30 minutes.
   }, [
     permission,
@@ -227,6 +260,10 @@ function ReminderScheduler({ now }: { now: Date }) {
     t,
     f,
     slot,
+    settings.currency,
+    recurrings,
+    money,
+    moneyCategoryOf,
   ]);
 
   return null;

@@ -8,6 +8,11 @@ import type { Notifications, PermissionState, ScheduledReminder } from './types'
 
 /** Au-delà, on ne minute pas : la liste est reprogrammée régulièrement par l'app. */
 export const WEB_MAX_DELAY_MS = 24 * 60 * 60_000;
+/**
+ * Un rappel en retard de moins de 2 min est montré tout de suite : la liste peut être
+ * reprogrammée à l'instant même où il devait sonner (sinon il serait perdu).
+ */
+export const REMINDER_GRACE_MS = 2 * 60_000;
 const ICON = '/icon-192.png';
 
 export interface WebNotificationEnv {
@@ -30,7 +35,14 @@ export function createWebNotifications(
   env: WebNotificationEnv | null = defaultEnv(),
 ): Notifications {
   let timers: number[] = [];
+  /** Rappels déjà montrés : jamais deux fois le même. */
+  const fired = new Set<number>();
   const granted = () => env?.api?.permission === 'granted';
+  const fire = (r: ScheduledReminder) => {
+    if (!env || fired.has(r.id) || !granted() || !env.isHidden()) return;
+    fired.add(r.id);
+    void env.show(r.title, r.body, String(r.id));
+  };
   return {
     background: false,
     permission: () => Promise.resolve(env?.api ? toState(env.api.permission) : 'unsupported'),
@@ -41,12 +53,9 @@ export function createWebNotifications(
       timers = [];
       for (const r of list) {
         const delay = r.at.getTime() - env.now();
-        if (delay <= 0 || delay > WEB_MAX_DELAY_MS) continue;
-        timers.push(
-          env.setTimer(() => {
-            if (granted() && env.isHidden()) void env.show(r.title, r.body, String(r.id));
-          }, delay),
-        );
+        if (delay > WEB_MAX_DELAY_MS || delay <= -REMINDER_GRACE_MS) continue;
+        if (delay <= 0) fire(r);
+        else timers.push(env.setTimer(() => fire(r), delay));
       }
       return Promise.resolve();
     },

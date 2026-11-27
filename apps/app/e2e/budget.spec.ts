@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { noHorizontalOverflow, onboard, settle } from './helpers';
+import { noHorizontalOverflow, onboard, settle, setupBudget } from './helpers';
 
 test.setTimeout(120_000);
 
@@ -10,19 +10,6 @@ const MONDAY_1030 = new Date('2026-11-23T10:30:00+01:00');
 /** Montant affiché en français, quel que soit l'espace insécable utilisé (« 1 000,00 € »). */
 const eur = (text: string) =>
   new RegExp(text.replace(/ /g, '[\\s\\u00a0\\u202f]?').replace('€', '[\\s\\u00a0\\u202f]?€'));
-
-async function setupBudget(page: Page) {
-  await page
-    .getByRole('group', { name: 'Choisir l’app' })
-    .getByRole('button', { name: 'Budget' })
-    .click();
-  await expect(page.getByRole('heading', { name: /Ton argent/ })).toBeVisible();
-  await page.getByRole('button', { name: 'EUR', exact: true }).click();
-  await page.getByLabel('Solde actuel · facultatif').fill('1000');
-  await page.getByLabel('Espèces sur toi · facultatif').fill('50');
-  await page.getByRole('button', { name: 'Commencer →' }).click();
-  await expect(page.getByRole('heading', { name: /Ton budget/ })).toBeVisible();
-}
 
 async function addTransaction(
   page: Page,
@@ -227,4 +214,19 @@ test('enveloppes : plafond, alerte à 80 %, échéance récurrente en pause', as
   await rec.getByRole('switch', { name: /Active/ }).click();
   await rec.getByRole('button', { name: 'Enregistrer' }).click();
   await expect(page.getByRole('button', { name: /^Loyer.*en pause/ })).toBeVisible();
+});
+
+test('objectif d’épargne : mensualité nécessaire pour la date visée', async ({ page }) => {
+  await setupBudget(page);
+  await page.getByRole('button', { name: '+ Objectif' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Objectif d’épargne' });
+  await sheet.getByLabel('Nom').fill('Téléphone');
+  await sheet.getByLabel('Montant visé').fill('400');
+  await sheet.getByLabel('Date visée · facultatif').fill('2027-03-23');
+  await sheet.getByLabel('Déjà épargné').fill('100');
+  await sheet.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByText('Objectif ajouté')).toBeVisible();
+  const goal = page.getByRole('button', { name: /^Téléphone/ });
+  await expect(goal).toContainText(/100,00.*400,00/);
+  await expect(goal).toContainText(/75,00.*par mois pour y être le 23 mars 2027/);
 });

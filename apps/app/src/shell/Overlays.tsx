@@ -10,6 +10,7 @@ import { GoalSheet } from '../sheets/GoalSheet';
 import { MoneyCategorySheet } from '../sheets/MoneyCategorySheet';
 import { MoneySheet } from '../sheets/MoneySheet';
 import { RecurringSheet } from '../sheets/RecurringSheet';
+import { SavingsGoalSheet } from '../sheets/SavingsGoalSheet';
 import { ReviewSheet } from '../sheets/ReviewSheet';
 import { Watchers } from './Watchers';
 
@@ -25,6 +26,7 @@ export function Overlays() {
       <AccountSheet />
       <MoneyCategorySheet />
       <RecurringSheet />
+      <SavingsGoalSheet />
       <ReviewSheet />
       <FocusMode />
       <Assistant />

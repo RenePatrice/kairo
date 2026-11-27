@@ -64,3 +64,17 @@ export async function settle(page: Page) {
     { polling: 200 },
   );
 }
+
+/** Budget configuré : euro, 1 000 € sur le compte principal, 50 € d'espèces. */
+export async function setupBudget(page: Page) {
+  await page
+    .getByRole('group', { name: 'Choisir l’app' })
+    .getByRole('button', { name: 'Budget' })
+    .click();
+  await expect(page.getByRole('heading', { name: /Ton argent/ })).toBeVisible();
+  await page.getByRole('button', { name: 'EUR', exact: true }).click();
+  await page.getByLabel('Solde actuel · facultatif').fill('1000');
+  await page.getByLabel('Espèces sur toi · facultatif').fill('50');
+  await page.getByRole('button', { name: 'Commencer →' }).click();
+  await expect(page.getByRole('heading', { name: /Ton budget/ })).toBeVisible();
+}

@@ -23,9 +23,11 @@ export function createNativeNotifications(): Notifications {
           notifications: pending.notifications.map((n) => ({ id: n.id })),
         });
       }
-      if (!list.length) return;
+      // Le système a déjà montré les rappels passés, à l'heure exacte.
+      const future = list.filter((r) => r.at.getTime() > Date.now());
+      if (!future.length) return;
       await LocalNotifications.schedule({
-        notifications: list.map((r) => ({
+        notifications: future.map((r) => ({
           id: r.id,
           title: r.title,
           body: r.body,
