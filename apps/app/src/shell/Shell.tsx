@@ -23,6 +23,7 @@ import { StatsScreen } from '../screens/StatsScreen';
 import { TodayScreen } from '../screens/TodayScreen';
 import { BudgetHome } from '../screens/budget/BudgetHome';
 import { BudgetSetup } from '../screens/budget/BudgetSetup';
+import { OpsScreen } from '../screens/budget/OpsScreen';
 import { SoonTab } from '../screens/budget/SoonTab';
 import { ModeSwitch } from '../components/ModeSwitch';
 import { useMoneyActions } from '../lib/budget';
@@ -56,7 +57,7 @@ function screenFor(screen: Screen): ReactNode {
     case 'money':
       return <BudgetHome />;
     case 'ops':
-      return <SoonTab title={i18next.t('app:budget.nav.ops')} />;
+      return <OpsScreen />;
     case 'envelopes':
       return <SoonTab title={i18next.t('app:budget.nav.envelopes')} />;
   }

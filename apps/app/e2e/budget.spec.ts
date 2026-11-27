@@ -31,13 +31,15 @@ async function addTransaction(
     amount,
     category,
     monthly = false,
-  }: { kind?: string; amount: string; category?: string; monthly?: boolean },
+    note,
+  }: { kind?: string; amount: string; category?: string; monthly?: boolean; note?: string },
 ) {
   await page.getByRole('button', { name: 'Ajouter une opération' }).first().click();
   const sheet = page.getByRole('dialog', { name: 'Opération' });
   await sheet.getByRole('button', { name: kind, exact: true }).click();
   await sheet.getByLabel('Montant').fill(amount);
   if (category) await sheet.getByRole('button', { name: category, exact: true }).click();
+  if (note) await sheet.getByLabel('Note · facultatif').fill(note);
   if (monthly) await sheet.getByRole('switch', { name: /Chaque mois/ }).click();
   await sheet.getByRole('button', { name: 'Enregistrer' }).click();
   await expect(sheet).toBeHidden();
@@ -128,4 +130,57 @@ test('accessibilité du Budget : aucune violation grave', async ({ page }) => {
       .filter((v) => v.impact === 'serious' || v.impact === 'critical')
       .map((v) => `${v.id} ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);
+});
+
+test('opérations : regroupées par jour, filtres et recherche', async ({ page }, info) => {
+  await setupBudget(page);
+  await addTransaction(page, { amount: '12,50', category: 'Courses', note: 'Marché' });
+  await addTransaction(page, { amount: '8', category: 'Transport', note: 'Taxi' });
+  await addTransaction(page, { kind: 'Revenu', amount: '1500', category: 'Salaire' });
+  await page.getByRole('button', { name: 'Opérations' }).first().click();
+  await expect(page.getByRole('heading', { name: /Tes opérations/ })).toBeVisible();
+  await expect(page.getByText(/^Lundi 23 nov/)).toBeVisible();
+  const rows = page.getByRole('main').getByRole('button', { name: /€/ });
+  await expect(rows).toHaveCount(3);
+
+  await page
+    .getByRole('group', { name: 'Filtrer par catégorie' })
+    .getByRole('button', { name: 'Transport' })
+    .click();
+  await expect(rows).toHaveCount(1);
+  await expect(page.getByRole('button', { name: /Transport.*Taxi/ })).toBeVisible();
+  await page
+    .getByRole('group', { name: 'Filtrer par catégorie' })
+    .getByRole('button', { name: 'Toutes' })
+    .click();
+
+  await page.getByLabel('Rechercher une opération').fill('marche');
+  await expect(rows).toHaveCount(1);
+  await expect(page.getByRole('button', { name: /Courses.*Marché/ })).toBeVisible();
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: `test-results/shots/${info.project.name}-budget-ops.png`,
+    fullPage: true,
+  });
+});
+
+test('comptes : ajout à découvert, puis suppression annulée', async ({ page }) => {
+  await setupBudget(page);
+  await page.getByRole('button', { name: '+ Compte' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Compte' });
+  await sheet.getByLabel('Nom').fill('Mobile');
+  await sheet.getByRole('button', { name: 'Mobile money' }).click();
+  await sheet.getByLabel('Solde de départ').fill('-50');
+  await sheet.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByText('Compte ajouté')).toBeVisible();
+  const row = page.getByRole('button', { name: /^Mobile Mobile money/ });
+  await expect(row).toContainText(/-50,00/);
+  await expect(page.getByText(eur('Solde total 1 000,00 €'))).toBeVisible();
+
+  await row.click();
+  await expect(sheet.getByLabel('Solde de départ')).toHaveValue('-50,00');
+  await sheet.getByRole('button', { name: 'Supprimer' }).click();
+  await expect(row).toHaveCount(0);
+  await page.getByRole('button', { name: 'Annuler' }).click();
+  await expect(row).toBeVisible();
 });

@@ -8,9 +8,9 @@ import {
   totalBalance,
   upcomingDue,
 } from '@kairo/core';
-import { GlassSurface, status, withAlpha } from '@kairo/ui';
+import { Button, GlassSurface, Pressable, status, withAlpha } from '@kairo/ui';
 import { useTranslation } from 'react-i18next';
-import { useBudget, useMoneyActions } from '../../lib/budget';
+import { amountInput, useBudget, useMoneyActions } from '../../lib/budget';
 import { useFormat } from '../../lib/format';
 import { useNow } from '../../lib/useNow';
 import { useUi } from '../../store';
@@ -25,6 +25,7 @@ export function BudgetHome() {
   const f = useFormat();
   const now = useNow(60_000);
   const go = useUi((s) => s.go);
+  const openAccount = useUi((s) => s.openAccount);
   const b = useBudget();
   const { editTransaction } = useMoneyActions();
   if (!b.ready) return null;
@@ -88,7 +89,18 @@ export function BudgetHome() {
         {b.accounts.map((a) => {
           const balance = accountBalance(a, b.transactions);
           return (
-            <div key={a.id} className="flex items-center gap-3">
+            <Pressable
+              key={a.id}
+              onClick={() =>
+                openAccount({
+                  id: a.id,
+                  name: a.name,
+                  kind: a.kind,
+                  opening: amountInput(a.openingCents, f.locale),
+                })
+              }
+              className="-mx-2 flex items-center gap-3 rounded-field px-2 py-1 text-left"
+            >
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-body font-semibold">{a.name}</span>
                 <span className="text-caption text-ink3">{t(`budget.accountKinds.${a.kind}`)}</span>
@@ -99,9 +111,16 @@ export function BudgetHome() {
               >
                 {b.money(balance)}
               </span>
-            </div>
+            </Pressable>
           );
         })}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => openAccount({ id: null, name: '', kind: 'bank', opening: '' })}
+        >
+          {t('budget.account.add')}
+        </Button>
       </GlassSurface>
 
       {envs.length ? (

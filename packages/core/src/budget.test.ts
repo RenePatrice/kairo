@@ -12,6 +12,7 @@ import {
   monthKeyOf,
   monthSummary,
   parseAmount,
+  parseSignedAmount,
   recurringToCreate,
   remainingToSpend,
   topCategories,
@@ -116,6 +117,15 @@ describe('montants et mois', () => {
     expect(parseAmount('0')).toBeNull();
     expect(parseAmount('abc')).toBeNull();
     expect(parseAmount('12,345')).toBeNull();
+  });
+
+  it('lit un solde signé (découvert)', () => {
+    expect(parseSignedAmount('-50')).toBe(-5_000);
+    expect(parseSignedAmount('−12,5')).toBe(-1_250);
+    expect(parseSignedAmount('1000')).toBe(100_000);
+    expect(parseSignedAmount('')).toBe(0);
+    expect(parseSignedAmount('0,00')).toBe(0);
+    expect(parseSignedAmount('-abc')).toBeNull();
   });
 
   it('manipule les mois', () => {

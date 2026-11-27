@@ -78,6 +78,17 @@ export function parseAmount(input: string): Cents | null {
   return cents > 0 ? cents : null;
 }
 
+/**
+ * Solde saisi, éventuellement négatif (« −50 », « -12,5 ») ; vide ou zéro = 0 ; `null` si illisible.
+ */
+export function parseSignedAmount(input: string): Cents | null {
+  const text = input.trim();
+  if (!text || /^[-−]?\s*0+(?:[.,]0+)?$/.test(text)) return 0;
+  const negative = /^[-−]/.test(text);
+  const cents = parseAmount(negative ? text.slice(1) : text);
+  return cents === null ? null : negative ? -cents : cents;
+}
+
 // ---- Mois
 
 export function monthKeyOf(date: Date | DateKey): MonthKey {

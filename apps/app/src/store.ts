@@ -18,7 +18,7 @@ export type Screen =
   | 'money'
   | 'ops'
   | 'envelopes';
-export type SheetKind = 'block' | 'act' | 'dup' | 'goal' | 'review' | 'money' | null;
+export type SheetKind = 'block' | 'act' | 'dup' | 'goal' | 'review' | 'money' | 'account' | null;
 export type StatTab = 'day' | 'week' | 'trophy';
 
 export interface BlockForm {
@@ -55,6 +55,15 @@ export interface MoneyForm {
   /** Créer aussi une échéance mensuelle (nouvelle opération uniquement). */
   monthly: boolean;
   recurringId: string | null;
+}
+
+/** Fiche Compte du Budget. */
+export interface AccountForm {
+  id: string | null;
+  name: string;
+  kind: 'bank' | 'cash' | 'mobile' | 'savings' | 'other';
+  /** Saisie libre (« 1 000 », « −50 »). */
+  opening: string;
 }
 
 /** Fiche Objectif (maquette : `gf`). */
@@ -182,6 +191,7 @@ interface UiState {
   goalForm: GoalForm | null;
   reviewForm: ReviewForm | null;
   moneyForm: MoneyForm | null;
+  accountForm: AccountForm | null;
   /** Récap en stories ouvert (index de l'écran), ou `null`. */
   recap: number | null;
   /** Créneau tout juste validé : « Bravo. Comment tu te sens après … ? ». */
@@ -219,6 +229,8 @@ interface UiState {
   setRecap: (index: number | null) => void;
   openMoney: (form: MoneyForm) => void;
   patchMoney: (patch: Partial<MoneyForm>) => void;
+  openAccount: (form: AccountForm) => void;
+  patchAccount: (patch: Partial<AccountForm>) => void;
   setRate: (rate: { day: string; blockId: string; name: string } | null) => void;
   setNotifPermission: (permission: PermissionState) => void;
   setDataReady: () => void;
@@ -246,6 +258,7 @@ export const useUi = create<UiState>((set) => ({
   reviewForm: null,
   recap: null,
   moneyForm: null,
+  accountForm: null,
   rate: null,
   notifPermission: null,
   dataReady: false,
@@ -288,6 +301,9 @@ export const useUi = create<UiState>((set) => ({
     set((s) => (s.reviewForm ? { reviewForm: { ...s.reviewForm, ...patch } } : {})),
   setRecap: (recap) => set({ recap }),
   openMoney: (moneyForm) => set({ sheet: 'money', moneyForm }),
+  openAccount: (accountForm) => set({ sheet: 'account', accountForm }),
+  patchAccount: (patch) =>
+    set((s) => (s.accountForm ? { accountForm: { ...s.accountForm, ...patch } } : {})),
   patchMoney: (patch) =>
     set((s) => (s.moneyForm ? { moneyForm: { ...s.moneyForm, ...patch } } : {})),
   setRate: (rate) => set({ rate }),
