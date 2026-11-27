@@ -5,6 +5,7 @@
 import {
   addDays,
   autoReviewsDue,
+  dateKey,
   dayReview,
   firstCheckDay,
   newTrophies,
@@ -16,6 +17,7 @@ import {
 } from '@kairo/core';
 import {
   addGoals,
+  applyDueRecurring,
   addReviews,
   markTrophiesSeen,
   useDb,
@@ -41,6 +43,7 @@ export function Watchers() {
       <TrophyWatcher now={now} />
       <ReminderScheduler now={now} />
       <BackButton />
+      <RecurringWatcher now={now} />
     </>
   );
 }
@@ -239,6 +242,12 @@ const ONBOARDING_BACK = { rhythm: 'welcome', acts: 'rhythm' } as const;
  */
 function BackButton() {
   const back = useBack();
+  const { settings } = useAppData();
+  // Lu au moment de l'appui : le mode a pu changer depuis l'abonnement.
+  const modeRef = useRef(settings.mode);
+  useEffect(() => {
+    modeRef.current = settings.mode;
+  }, [settings.mode]);
   useEffect(
     () =>
       back.onBack(() => {
@@ -249,12 +258,24 @@ function BackButton() {
         else if (ui.assistant) ui.setAssistant(false);
         else if (ui.notif) ui.setNotif(null);
         else if (ui.screen === 'rhythm' || ui.screen === 'acts') ui.go(ONBOARDING_BACK[ui.screen]);
-        else if (ui.screen === 'week' || ui.screen === 'stats' || ui.screen === 'me')
-          ui.go('today');
+        else if (ui.screen === 'ops' || ui.screen === 'envelopes') ui.go('money');
+        else if (ui.screen === 'week' || ui.screen === 'stats') ui.go('today');
+        else if (ui.screen === 'me') ui.go(modeRef.current === 'budget' ? 'money' : 'today');
         else return false;
         return true;
       }),
     [back],
   );
+  return null;
+}
+
+/** Budget : ajoute les échéances récurrentes du jour (loyer, salaire…) une fois par jour. */
+function RecurringWatcher({ now }: { now: Date }) {
+  const db = useDb();
+  const { settings } = useAppData();
+  const day = dateKey(now);
+  useEffect(() => {
+    if (settings.currency) void applyDueRecurring(db, day);
+  }, [db, day, settings.currency]);
   return null;
 }

@@ -269,7 +269,10 @@ export function upcomingDue(
 // ---- Reste à dépenser
 
 export interface Remaining {
-  /** Revenus − dépenses du mois, échéances encore à venir ce mois-ci comprises. */
+  /**
+   * Argent disponible jusqu'à la fin du mois : solde des comptes de tous les jours (hors
+   * épargne), plus les revenus attendus, moins les factures attendues d'ici la fin du mois.
+   */
   remainingCents: Cents;
   /** Jours restants dans le mois, aujourd'hui compris. */
   daysLeft: number;
@@ -278,12 +281,15 @@ export interface Remaining {
 }
 
 export function remainingToSpend(
+  accounts: readonly MoneyAccount[],
   txs: readonly MoneyTransaction[],
   recurring: readonly MoneyRecurring[],
   today: DateKey,
 ): Remaining {
   const month = monthKeyOf(today);
-  const s = monthSummary(txs, month);
+  // Les comptes épargne ne servent pas aux dépenses courantes.
+  const everyday = accounts.filter((a) => a.kind !== 'savings');
+  const available = totalBalance(everyday, txs, today);
   const end = `${month}-${String(daysInMonth(month)).padStart(2, '0')}`;
   const after = dateKey(addDays(parseDateKey(today), 1));
   let pending = 0;
@@ -291,7 +297,7 @@ export function remainingToSpend(
     const r = recurring.find((x) => x.id === d.recurringId);
     if (r) pending += r.kind === 'income' ? r.amountCents : -r.amountCents;
   }
-  const remainingCents = s.netCents + pending;
+  const remainingCents = available + pending;
   const daysLeft = daysInMonth(month) - Number(today.slice(8, 10)) + 1;
   return {
     remainingCents,

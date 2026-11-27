@@ -220,22 +220,35 @@ describe('récurrent', () => {
 });
 
 describe('reste à dépenser', () => {
-  it('déduit les échéances encore à venir ce mois-ci et donne un budget par jour', () => {
-    expect(remainingToSpend(txs, recurring, '2026-11-23')).toEqual({
-      remainingCents: 80_000 - 3_000,
+  it('part de l’argent disponible et déduit les factures à venir ce mois-ci', () => {
+    // Comptes : 165 000 (banque 168 000, espèces −3 000) ; reste la facture de 3 000 le 28.
+    expect(remainingToSpend(accounts, txs, recurring, '2026-11-23')).toEqual({
+      remainingCents: 165_000 - 3_000,
       daysLeft: 8,
-      perDayCents: Math.floor(77_000 / 8),
+      perDayCents: Math.floor(162_000 / 8),
     });
   });
 
+  it('ne compte pas les comptes épargne', () => {
+    const savings: MoneyAccount = {
+      id: 'sav',
+      name: 'Livret',
+      kind: 'savings',
+      openingCents: 50_000,
+    };
+    expect(
+      remainingToSpend([...accounts, savings], txs, recurring, '2026-11-23').remainingCents,
+    ).toBe(162_000);
+  });
+
   it('dernier jour du mois, et rien à dépenser si le solde est négatif', () => {
-    expect(remainingToSpend(txs, recurring, '2026-11-30')).toMatchObject({
+    expect(remainingToSpend(accounts, txs, recurring, '2026-11-30')).toMatchObject({
       daysLeft: 1,
-      remainingCents: 80_000,
+      remainingCents: 165_000,
     });
     const broke = [tx('b', 'expense', 500_000, '2026-11-02', { categoryId: 'courses' })];
-    expect(remainingToSpend(broke, [], '2026-11-23')).toMatchObject({
-      remainingCents: -500_000,
+    expect(remainingToSpend(accounts, broke, [], '2026-11-23')).toMatchObject({
+      remainingCents: 105_000 - 500_000,
       perDayCents: 0,
     });
   });

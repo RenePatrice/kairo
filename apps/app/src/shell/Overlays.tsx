@@ -6,6 +6,7 @@ import { ActivitySheet } from '../sheets/ActivitySheet';
 import { BlockSheet } from '../sheets/BlockSheet';
 import { CopyDaySheet } from '../sheets/CopyDaySheet';
 import { GoalSheet } from '../sheets/GoalSheet';
+import { MoneySheet } from '../sheets/MoneySheet';
 import { ReviewSheet } from '../sheets/ReviewSheet';
 import { Watchers } from './Watchers';
 
@@ -17,6 +18,7 @@ export function Overlays() {
       <ActivitySheet />
       <CopyDaySheet />
       <GoalSheet />
+      <MoneySheet />
       <ReviewSheet />
       <FocusMode />
       <Assistant />

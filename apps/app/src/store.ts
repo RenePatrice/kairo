@@ -5,8 +5,20 @@ import type { PermissionState } from '@kairo/platform';
 import { activityPalette } from '@kairo/ui';
 import { create } from 'zustand';
 
-export type Screen = 'lang' | 'welcome' | 'rhythm' | 'acts' | 'today' | 'week' | 'stats' | 'me';
-export type SheetKind = 'block' | 'act' | 'dup' | 'goal' | 'review' | null;
+export type Screen =
+  | 'lang'
+  | 'welcome'
+  | 'rhythm'
+  | 'acts'
+  | 'today'
+  | 'week'
+  | 'stats'
+  | 'me'
+  // Budget
+  | 'money'
+  | 'ops'
+  | 'envelopes';
+export type SheetKind = 'block' | 'act' | 'dup' | 'goal' | 'review' | 'money' | null;
 export type StatTab = 'day' | 'week' | 'trophy';
 
 export interface BlockForm {
@@ -27,6 +39,22 @@ export interface ActForm {
   name: string;
   color: string;
   weeklyGoalH: number;
+}
+
+/** Fiche Opération du Budget. */
+export interface MoneyForm {
+  id: string | null;
+  kind: 'expense' | 'income' | 'transfer';
+  /** Saisie libre (« 12,50 »), lue par `parseAmount`. */
+  amount: string;
+  categoryId: string | null;
+  accountId: string | null;
+  toAccountId: string | null;
+  date: string;
+  note: string;
+  /** Créer aussi une échéance mensuelle (nouvelle opération uniquement). */
+  monthly: boolean;
+  recurringId: string | null;
 }
 
 /** Fiche Objectif (maquette : `gf`). */
@@ -153,6 +181,7 @@ interface UiState {
   statTab: StatTab;
   goalForm: GoalForm | null;
   reviewForm: ReviewForm | null;
+  moneyForm: MoneyForm | null;
   /** Récap en stories ouvert (index de l'écran), ou `null`. */
   recap: number | null;
   /** Créneau tout juste validé : « Bravo. Comment tu te sens après … ? ». */
@@ -188,6 +217,8 @@ interface UiState {
   openReview: (form: ReviewForm) => void;
   patchReview: (patch: Partial<ReviewForm>) => void;
   setRecap: (index: number | null) => void;
+  openMoney: (form: MoneyForm) => void;
+  patchMoney: (patch: Partial<MoneyForm>) => void;
   setRate: (rate: { day: string; blockId: string; name: string } | null) => void;
   setNotifPermission: (permission: PermissionState) => void;
   setDataReady: () => void;
@@ -214,6 +245,7 @@ export const useUi = create<UiState>((set) => ({
   goalForm: null,
   reviewForm: null,
   recap: null,
+  moneyForm: null,
   rate: null,
   notifPermission: null,
   dataReady: false,
@@ -255,6 +287,9 @@ export const useUi = create<UiState>((set) => ({
   patchReview: (patch) =>
     set((s) => (s.reviewForm ? { reviewForm: { ...s.reviewForm, ...patch } } : {})),
   setRecap: (recap) => set({ recap }),
+  openMoney: (moneyForm) => set({ sheet: 'money', moneyForm }),
+  patchMoney: (patch) =>
+    set((s) => (s.moneyForm ? { moneyForm: { ...s.moneyForm, ...patch } } : {})),
   setRate: (rate) => set({ rate }),
   setNotifPermission: (notifPermission) => set({ notifPermission }),
   setDataReady: () => set({ dataReady: true }),

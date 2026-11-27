@@ -11,6 +11,11 @@ export const icons = {
   close: 'M6 6l12 12M18 6L6 18',
   check: 'M5 12l4 4L19 6',
   plus: 'M12 5v14M5 12h14',
+  /** Budget : portefeuille, liste d'opérations, enveloppes (camembert), virement. */
+  wallet: 'M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 7l11-3v3M16 13.5h.01',
+  list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
+  pie: 'M11 4a8 8 0 1 0 9 9h-9zM14 3.5A7 7 0 0 1 20.5 10H14z',
+  transfer: 'M5 8h14l-3-3M19 16H5l3 3',
   moon: 'M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z',
   play: 'M7 4l13 8-13 8z',
   chevronLeft: 'M15 6l-6 6 6 6',

@@ -21,6 +21,12 @@ import { WelcomeStep } from '../screens/onboarding/WelcomeStep';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { TodayScreen } from '../screens/TodayScreen';
+import { BudgetHome } from '../screens/budget/BudgetHome';
+import { BudgetSetup } from '../screens/budget/BudgetSetup';
+import { SoonTab } from '../screens/budget/SoonTab';
+import { ModeSwitch } from '../components/ModeSwitch';
+import { useMoneyActions } from '../lib/budget';
+import i18next from 'i18next';
 import { WeekScreen } from '../screens/WeekScreen';
 import { AppToast } from './AppToast';
 import { Overlays } from './Overlays';
@@ -47,13 +53,25 @@ function screenFor(screen: Screen): ReactNode {
       return <StatsScreen />;
     case 'me':
       return <SettingsScreen />;
+    case 'money':
+      return <BudgetHome />;
+    case 'ops':
+      return <SoonTab title={i18next.t('app:budget.nav.ops')} />;
+    case 'envelopes':
+      return <SoonTab title={i18next.t('app:budget.nav.envelopes')} />;
   }
 }
+
+const BUDGET_SCREENS: readonly Screen[] = ['money', 'ops', 'envelopes'];
 
 export function Shell({ screen }: { screen: Screen }) {
   const { t } = useTranslation('app');
   const { reduceMotion } = useAppearance();
-  const { blocks, categoryOf } = useAppData();
+  const { blocks, categoryOf, settings } = useAppData();
+  const { newTransaction } = useMoneyActions();
+  const budget = settings.mode === 'budget';
+  // Budget pas encore configuré : l'écran de configuration remplace l'Aperçu.
+  const needsSetup = BUDGET_SCREENS.includes(screen) && !settings.currency;
   const desktop = useMediaQuery(`(min-width: ${breakpoints.desktop}px)`);
   const assistantOpen = useUi((s) => s.assistant);
   const go = useUi((s) => s.go);
@@ -66,18 +84,34 @@ export function Shell({ screen }: { screen: Screen }) {
     return ambientColors(minuteOfDay(now), cur ? categoryOf(cur.slot.categoryId).color : undefined);
   }, [screen, blocks, now, categoryOf]);
 
-  const tabs: DockTab[] = [
-    { id: 'today', label: t('nav.today'), icon: 'today' },
-    { id: 'week', label: t('nav.week'), icon: 'week' },
-    { id: 'stats', label: t('nav.stats'), icon: 'stats' },
-    { id: 'me', label: t('nav.me'), icon: 'me' },
-  ];
+  const tabs: DockTab[] = budget
+    ? [
+        { id: 'money', label: t('budget.nav.money'), icon: 'wallet' },
+        { id: 'ops', label: t('budget.nav.ops'), icon: 'list' },
+        { id: 'envelopes', label: t('budget.nav.envelopes'), icon: 'pie' },
+        { id: 'me', label: t('nav.me'), icon: 'me' },
+      ]
+    : [
+        { id: 'today', label: t('nav.today'), icon: 'today' },
+        { id: 'week', label: t('nav.week'), icon: 'week' },
+        { id: 'stats', label: t('nav.stats'), icon: 'stats' },
+        { id: 'me', label: t('nav.me'), icon: 'me' },
+      ];
   const dock = (
     <Dock
       tabs={tabs}
       current={screen}
       onSelect={(id) => go(id as Screen)}
       onAssistant={() => setAssistant(true)}
+      center={
+        budget
+          ? {
+              label: t('budget.nav.add'),
+              icon: 'plus',
+              onPress: () => (settings.currency ? newTransaction() : go('money')),
+            }
+          : undefined
+      }
       className={desktop ? 'py-4' : 'py-1.5'}
     />
   );
@@ -104,7 +138,12 @@ export function Shell({ screen }: { screen: Screen }) {
               exit={{ opacity: 0, transition: { duration: 0.12 } }}
               transition={{ ...transitionFor('screen', reduceMotion), opacity: { duration: 0.25 } }}
             >
-              {screenFor(screen)}
+              {showDock && !needsSetup ? (
+                <div className="mb-4 desktop:mx-auto desktop:max-w-160">
+                  <ModeSwitch />
+                </div>
+              ) : null}
+              {needsSetup ? <BudgetSetup /> : screenFor(screen)}
             </motion.div>
           </AnimatePresence>
         </main>

@@ -51,8 +51,11 @@ function Root() {
 
   // Premier écran : la langue, puis l'accueil, ou Aujourd'hui si le programme existe déjà.
   useEffect(() => {
-    if (screen === null) go(!settings.locale ? 'lang' : settings.started ? 'today' : 'welcome');
-  }, [screen, go, settings.locale, settings.started]);
+    if (screen === null) {
+      const home = settings.mode === 'budget' ? 'money' : 'today';
+      go(!settings.locale ? 'lang' : settings.started ? home : 'welcome');
+    }
+  }, [screen, go, settings.locale, settings.started, settings.mode]);
 
   return (
     <LocaleSync locale={settings.locale ?? 'fr'}>

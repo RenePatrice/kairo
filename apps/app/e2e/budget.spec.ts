@@ -1,0 +1,131 @@
+import AxeBuilder from '@axe-core/playwright';
+import { expect, test, type Page } from '@playwright/test';
+import { noHorizontalOverflow, onboard, settle } from './helpers';
+
+test.setTimeout(120_000);
+
+// Lundi 23 novembre 2026, 10 h 30 (Europe/Paris).
+const MONDAY_1030 = new Date('2026-11-23T10:30:00+01:00');
+
+/** Montant affiché en français, quel que soit l'espace insécable utilisé (« 1 000,00 € »). */
+const eur = (text: string) =>
+  new RegExp(text.replace(/ /g, '[\\s\\u00a0\\u202f]?').replace('€', '[\\s\\u00a0\\u202f]?€'));
+
+async function setupBudget(page: Page) {
+  await page
+    .getByRole('group', { name: 'Choisir l’app' })
+    .getByRole('button', { name: 'Budget' })
+    .click();
+  await expect(page.getByRole('heading', { name: /Ton argent/ })).toBeVisible();
+  await page.getByRole('button', { name: 'EUR', exact: true }).click();
+  await page.getByLabel('Solde actuel · facultatif').fill('1000');
+  await page.getByLabel('Espèces sur toi · facultatif').fill('50');
+  await page.getByRole('button', { name: 'Commencer →' }).click();
+  await expect(page.getByRole('heading', { name: /Ton budget/ })).toBeVisible();
+}
+
+async function addTransaction(
+  page: Page,
+  {
+    kind = 'Dépense',
+    amount,
+    category,
+    monthly = false,
+  }: { kind?: string; amount: string; category?: string; monthly?: boolean },
+) {
+  await page.getByRole('button', { name: 'Ajouter une opération' }).first().click();
+  const sheet = page.getByRole('dialog', { name: 'Opération' });
+  await sheet.getByRole('button', { name: kind, exact: true }).click();
+  await sheet.getByLabel('Montant').fill(amount);
+  if (category) await sheet.getByRole('button', { name: category, exact: true }).click();
+  if (monthly) await sheet.getByRole('switch', { name: /Chaque mois/ }).click();
+  await sheet.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(sheet).toBeHidden();
+}
+
+test.beforeEach(async ({ page }) => {
+  await page.clock.install({ time: MONDAY_1030 });
+  await onboard(page);
+});
+
+test('configure le Budget, ajoute une dépense et revient au mode Temps', async ({ page }, info) => {
+  await setupBudget(page);
+  await expect(page.getByText(eur('Solde total 1 050,00 €'))).toBeVisible();
+  await addTransaction(page, { amount: '12,50', category: 'Courses' });
+  await expect(page.getByText('Opération ajoutée')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Courses.*12,50/ })).toBeVisible();
+  await expect(page.getByText(eur('Solde total 1 037,50 €'))).toBeVisible();
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: `test-results/shots/${info.project.name}-budget-home.png`,
+    fullPage: true,
+  });
+
+  await page
+    .getByRole('group', { name: 'Choisir l’app' })
+    .getByRole('button', { name: 'Temps' })
+    .click();
+  await expect(page.getByRole('heading', { name: /semaine/ })).toBeHidden();
+  await expect(page.getByRole('heading', { name: /Bonjour/ })).toBeVisible();
+});
+
+test('revenu mensuel, virement entre comptes, puis modification et suppression', async ({
+  page,
+}) => {
+  await setupBudget(page);
+  await addTransaction(page, {
+    kind: 'Revenu',
+    amount: '1500',
+    category: 'Salaire',
+    monthly: true,
+  });
+  await expect(page.getByText('Prochaines échéances')).toBeVisible();
+  await expect(page.getByText(eur('Solde total 2 550,00 €'))).toBeVisible();
+
+  await addTransaction(page, { kind: 'Virement', amount: '20' });
+  await expect(page.getByRole('button', { name: /Compte principal → Espèces/ })).toBeVisible();
+  await expect(page.getByText(eur('Solde total 2 550,00 €'))).toBeVisible();
+
+  await page.getByRole('button', { name: /Compte principal → Espèces/ }).click();
+  const sheet = page.getByRole('dialog', { name: 'Opération' });
+  await expect(sheet.getByLabel('Montant')).toHaveValue('20,00');
+  await sheet.getByRole('button', { name: 'Supprimer' }).click();
+  await expect(page.getByRole('button', { name: /Compte principal → Espèces/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Annuler' }).click();
+  await expect(page.getByRole('button', { name: /Compte principal → Espèces/ })).toBeVisible();
+});
+
+test('refuse une opération sans montant ou sans catégorie', async ({ page }) => {
+  await setupBudget(page);
+  await page.getByRole('button', { name: 'Ajouter une opération' }).first().click();
+  const sheet = page.getByRole('dialog', { name: 'Opération' });
+  await sheet.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByText('Indique un montant')).toBeVisible();
+  await sheet.getByLabel('Montant').fill('8');
+  await sheet.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByText('Choisis une catégorie')).toBeVisible();
+  await expect(sheet).toBeVisible();
+});
+
+test('accessibilité du Budget : aucune violation grave', async ({ page }) => {
+  test.setTimeout(180_000);
+  await page
+    .getByRole('group', { name: 'Choisir l’app' })
+    .getByRole('button', { name: 'Budget' })
+    .click();
+  await settle(page);
+  let { violations } = await new AxeBuilder({ page }).analyze();
+  expect(
+    violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id),
+  ).toEqual([]);
+  await page.getByRole('button', { name: 'EUR', exact: true }).click();
+  await page.getByRole('button', { name: 'Commencer →' }).click();
+  await addTransaction(page, { amount: '9,90', category: 'Loisirs' });
+  await settle(page);
+  ({ violations } = await new AxeBuilder({ page }).analyze());
+  expect(
+    violations
+      .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+      .map((v) => `${v.id} ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
+  ).toEqual([]);
+});

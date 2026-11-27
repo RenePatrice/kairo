@@ -20,6 +20,11 @@ export interface DockProps {
   onSelect: (id: string) => void;
   /** Ouvre l'assistant (orbe irisé central). */
   onAssistant: () => void;
+  /**
+   * Bouton central à la place de l'assistant (mode Budget : « + Ajouter une opération »).
+   * Même orbe irisée, autre icône et autre action.
+   */
+  center?: { label: string; icon: IconName; onPress: () => void };
   className?: string;
 }
 
@@ -27,7 +32,7 @@ export interface DockProps {
  * Navigation principale en verre : capsule flottante en bas sur téléphone, avec l'orbe de
  * l'assistant au centre (maquette) ; barre latérale verticale sur ordinateur (≥ 1024 px).
  */
-export function Dock({ tabs, current, onSelect, onAssistant, className = '' }: DockProps) {
+export function Dock({ tabs, current, onSelect, onAssistant, center, className = '' }: DockProps) {
   const { t } = useTranslation('ui');
   const { reduceMotion } = useAppearance();
   const half = Math.ceil(tabs.length / 2);
@@ -63,8 +68,8 @@ export function Dock({ tabs, current, onSelect, onAssistant, className = '' }: D
     <li className="flex justify-center desktop:order-first desktop:mb-2 desktop:justify-start desktop:px-2">
       <Pressable
         haptic
-        onClick={onAssistant}
-        aria-label={t('nav.assistant')}
+        onClick={center?.onPress ?? onAssistant}
+        aria-label={center?.label ?? t('nav.assistant')}
         className="relative -mt-8 flex size-17 items-center justify-center rounded-pill desktop:mt-0 desktop:size-14"
       >
         <span
@@ -81,7 +86,7 @@ export function Dock({ tabs, current, onSelect, onAssistant, className = '' }: D
             background: `radial-gradient(circle at 35% 30%, ${orbCore[0]}, ${orbCore[1]} 70%)`,
           }}
         />
-        <Icon name="sparkle" size={24} className="relative text-white" />
+        <Icon name={center?.icon ?? 'sparkle'} size={24} className="relative text-white" />
       </Pressable>
     </li>
   );
