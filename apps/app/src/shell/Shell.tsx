@@ -24,10 +24,9 @@ import { TodayScreen } from '../screens/TodayScreen';
 import { BudgetHome } from '../screens/budget/BudgetHome';
 import { BudgetSetup } from '../screens/budget/BudgetSetup';
 import { OpsScreen } from '../screens/budget/OpsScreen';
-import { SoonTab } from '../screens/budget/SoonTab';
+import { EnvelopesScreen } from '../screens/budget/EnvelopesScreen';
 import { ModeSwitch } from '../components/ModeSwitch';
 import { useMoneyActions } from '../lib/budget';
-import i18next from 'i18next';
 import { WeekScreen } from '../screens/WeekScreen';
 import { AppToast } from './AppToast';
 import { Overlays } from './Overlays';
@@ -59,7 +58,7 @@ function screenFor(screen: Screen): ReactNode {
     case 'ops':
       return <OpsScreen />;
     case 'envelopes':
-      return <SoonTab title={i18next.t('app:budget.nav.envelopes')} />;
+      return <EnvelopesScreen />;
   }
 }
 

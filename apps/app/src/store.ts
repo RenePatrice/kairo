@@ -18,7 +18,17 @@ export type Screen =
   | 'money'
   | 'ops'
   | 'envelopes';
-export type SheetKind = 'block' | 'act' | 'dup' | 'goal' | 'review' | 'money' | 'account' | null;
+export type SheetKind =
+  | 'block'
+  | 'act'
+  | 'dup'
+  | 'goal'
+  | 'review'
+  | 'money'
+  | 'account'
+  | 'moneyCategory'
+  | 'recurring'
+  | null;
 export type StatTab = 'day' | 'week' | 'trophy';
 
 export interface BlockForm {
@@ -64,6 +74,29 @@ export interface AccountForm {
   kind: 'bank' | 'cash' | 'mobile' | 'savings' | 'other';
   /** Saisie libre (« 1 000 », « −50 »). */
   opening: string;
+}
+
+/** Fiche Catégorie du Budget. */
+export interface MoneyCategoryForm {
+  id: string | null;
+  name: string;
+  color: string;
+  kind: 'expense' | 'income';
+  /** Plafond saisi (« 300 ») ; vide = sans plafond. */
+  limit: string;
+}
+
+/** Fiche Échéance récurrente du Budget. */
+export interface RecurringForm {
+  id: string | null;
+  kind: 'expense' | 'income';
+  amount: string;
+  categoryId: string | null;
+  accountId: string | null;
+  dayOfMonth: number;
+  startDate: string;
+  note: string;
+  active: boolean;
 }
 
 /** Fiche Objectif (maquette : `gf`). */
@@ -192,6 +225,8 @@ interface UiState {
   reviewForm: ReviewForm | null;
   moneyForm: MoneyForm | null;
   accountForm: AccountForm | null;
+  moneyCategoryForm: MoneyCategoryForm | null;
+  recurringForm: RecurringForm | null;
   /** Récap en stories ouvert (index de l'écran), ou `null`. */
   recap: number | null;
   /** Créneau tout juste validé : « Bravo. Comment tu te sens après … ? ». */
@@ -231,6 +266,10 @@ interface UiState {
   patchMoney: (patch: Partial<MoneyForm>) => void;
   openAccount: (form: AccountForm) => void;
   patchAccount: (patch: Partial<AccountForm>) => void;
+  openMoneyCategory: (form: MoneyCategoryForm) => void;
+  patchMoneyCategory: (patch: Partial<MoneyCategoryForm>) => void;
+  openRecurring: (form: RecurringForm) => void;
+  patchRecurring: (patch: Partial<RecurringForm>) => void;
   setRate: (rate: { day: string; blockId: string; name: string } | null) => void;
   setNotifPermission: (permission: PermissionState) => void;
   setDataReady: () => void;
@@ -259,6 +298,8 @@ export const useUi = create<UiState>((set) => ({
   recap: null,
   moneyForm: null,
   accountForm: null,
+  moneyCategoryForm: null,
+  recurringForm: null,
   rate: null,
   notifPermission: null,
   dataReady: false,
@@ -302,6 +343,14 @@ export const useUi = create<UiState>((set) => ({
   setRecap: (recap) => set({ recap }),
   openMoney: (moneyForm) => set({ sheet: 'money', moneyForm }),
   openAccount: (accountForm) => set({ sheet: 'account', accountForm }),
+  openMoneyCategory: (moneyCategoryForm) => set({ sheet: 'moneyCategory', moneyCategoryForm }),
+  patchMoneyCategory: (patch) =>
+    set((s) =>
+      s.moneyCategoryForm ? { moneyCategoryForm: { ...s.moneyCategoryForm, ...patch } } : {},
+    ),
+  openRecurring: (recurringForm) => set({ sheet: 'recurring', recurringForm }),
+  patchRecurring: (patch) =>
+    set((s) => (s.recurringForm ? { recurringForm: { ...s.recurringForm, ...patch } } : {})),
   patchAccount: (patch) =>
     set((s) => (s.accountForm ? { accountForm: { ...s.accountForm, ...patch } } : {})),
   patchMoney: (patch) =>

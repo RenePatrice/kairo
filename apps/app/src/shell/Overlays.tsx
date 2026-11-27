@@ -7,7 +7,9 @@ import { BlockSheet } from '../sheets/BlockSheet';
 import { CopyDaySheet } from '../sheets/CopyDaySheet';
 import { AccountSheet } from '../sheets/AccountSheet';
 import { GoalSheet } from '../sheets/GoalSheet';
+import { MoneyCategorySheet } from '../sheets/MoneyCategorySheet';
 import { MoneySheet } from '../sheets/MoneySheet';
+import { RecurringSheet } from '../sheets/RecurringSheet';
 import { ReviewSheet } from '../sheets/ReviewSheet';
 import { Watchers } from './Watchers';
 
@@ -21,6 +23,8 @@ export function Overlays() {
       <GoalSheet />
       <MoneySheet />
       <AccountSheet />
+      <MoneyCategorySheet />
+      <RecurringSheet />
       <ReviewSheet />
       <FocusMode />
       <Assistant />

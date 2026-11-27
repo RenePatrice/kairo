@@ -184,3 +184,47 @@ test('comptes : ajout à découvert, puis suppression annulée', async ({ page }
   await page.getByRole('button', { name: 'Annuler' }).click();
   await expect(row).toBeVisible();
 });
+
+test('enveloppes : plafond, alerte à 80 %, échéance récurrente en pause', async ({
+  page,
+}, info) => {
+  await setupBudget(page);
+  await page.getByRole('button', { name: 'Enveloppes' }).first().click();
+  await expect(page.getByRole('heading', { name: /Tes enveloppes/ })).toBeVisible();
+  await page
+    .getByRole('main')
+    .getByRole('button', { name: /^Courses/ })
+    .click();
+  const cat = page.getByRole('dialog', { name: 'Catégorie' });
+  await cat.getByLabel('Plafond mensuel · facultatif').fill('20');
+  await cat.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByText('Catégorie modifiée')).toBeVisible();
+  await expect(page.getByRole('main').getByRole('button', { name: /^Courses/ })).toContainText(
+    /reste 20,00/,
+  );
+
+  await addTransaction(page, { amount: '17', category: 'Courses' });
+  await expect(page.getByText('Courses : 85 % de l’enveloppe')).toBeVisible();
+  await expect(page.getByRole('main').getByRole('button', { name: /^Courses/ })).toContainText(
+    'BIENTÔT',
+  );
+
+  await page.getByRole('button', { name: '+ Récurrent' }).click();
+  const rec = page.getByRole('dialog', { name: 'Récurrent' });
+  await rec.getByLabel('Montant').fill('450');
+  await rec.getByRole('button', { name: 'Logement', exact: true }).click();
+  await rec.getByLabel('Note · facultatif').fill('Loyer');
+  await rec.getByRole('button', { name: 'Enregistrer' }).click();
+  const loyer = page.getByRole('button', { name: /^Loyer le 23 de chaque mois/ });
+  await expect(loyer).toBeVisible();
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: `test-results/shots/${info.project.name}-budget-envelopes.png`,
+    fullPage: true,
+  });
+
+  await loyer.click();
+  await rec.getByRole('switch', { name: /Active/ }).click();
+  await rec.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByRole('button', { name: /^Loyer.*en pause/ })).toBeVisible();
+});
