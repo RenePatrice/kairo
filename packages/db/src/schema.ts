@@ -7,7 +7,7 @@
 import { AiSuggestion } from '@kairo/ai';
 import { z } from 'zod';
 
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const minute = z.number().int().min(0).max(1439);
@@ -122,6 +122,90 @@ export type Review = z.infer<typeof ReviewSchema>;
 export const SuggestionSchema = AiSuggestion.extend({ updatedAt: timestamp });
 export type Suggestion = z.infer<typeof SuggestionSchema>;
 
+// ---- Budget (v3) : montants en centimes entiers.
+
+const cents = z.number().int().min(-1_000_000_000_00).max(1_000_000_000_00);
+const positiveCents = z.number().int().min(1).max(1_000_000_000_00);
+
+export const accountKinds = ['bank', 'cash', 'mobile', 'savings', 'other'] as const;
+
+export const MoneyAccountSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1).max(40),
+  kind: z.enum(accountKinds),
+  /** Solde au moment où le compte est ajouté. */
+  openingCents: cents,
+  order: z.number(),
+  updatedAt: timestamp,
+  deleted,
+});
+export type MoneyAccountRow = z.infer<typeof MoneyAccountSchema>;
+
+export const MoneyCategorySchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1).max(40),
+  color: hex,
+  kind: z.enum(['expense', 'income']),
+  /** Plafond mensuel de l'enveloppe ; `null` = pas d'enveloppe. */
+  monthlyLimitCents: positiveCents.nullable(),
+  order: z.number(),
+  updatedAt: timestamp,
+  deleted,
+});
+export type MoneyCategoryRow = z.infer<typeof MoneyCategorySchema>;
+
+export const MoneyTransactionSchema = z
+  .object({
+    id: z.string().min(1),
+    kind: z.enum(['expense', 'income', 'transfer']),
+    amountCents: positiveCents,
+    date: isoDate,
+    accountId: z.string().min(1),
+    toAccountId: z.string().min(1).nullable(),
+    categoryId: z.string().min(1).nullable(),
+    recurringId: z.string().min(1).nullable(),
+    note: z.string().max(200),
+    updatedAt: timestamp,
+    deleted,
+  })
+  .refine(
+    (t) =>
+      t.kind === 'transfer'
+        ? t.toAccountId !== null && t.toAccountId !== t.accountId && t.categoryId === null
+        : t.categoryId !== null && t.toAccountId === null,
+    { message: 'transfer-or-category' },
+  );
+export type MoneyTransactionRow = z.infer<typeof MoneyTransactionSchema>;
+
+export const MoneyRecurringSchema = z.object({
+  id: z.string().min(1),
+  kind: z.enum(['expense', 'income']),
+  amountCents: positiveCents,
+  accountId: z.string().min(1),
+  categoryId: z.string().min(1),
+  dayOfMonth: z.number().int().min(1).max(31),
+  startDate: isoDate,
+  note: z.string().max(200),
+  active: z.boolean(),
+  updatedAt: timestamp,
+  deleted,
+});
+export type MoneyRecurringRow = z.infer<typeof MoneyRecurringSchema>;
+
+export const SavingsGoalSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1).max(40),
+  targetCents: positiveCents,
+  deadline: isoDate.nullable(),
+  /** Compte dont le solde mesure l'épargne ; sinon `savedCents`. */
+  accountId: z.string().min(1).nullable(),
+  savedCents: z.number().int().min(0),
+  color: hex,
+  updatedAt: timestamp,
+  deleted,
+});
+export type SavingsGoalRow = z.infer<typeof SavingsGoalSchema>;
+
 export const OptionsSchema = z.object({
   /** Réduire la transparence : surfaces pleines. */
   solid: z.boolean(),
@@ -157,6 +241,14 @@ export const SettingsSchema = z.object({
   trophiesSeen: z.array(z.string()).default([]),
   /** Sessions focus terminées (trophée « Esprit clair »). */
   focusCount: z.number().int().min(0).default(0),
+  /** App ouverte en dernier : planning (« Temps ») ou « Budget ». */
+  mode: z.enum(['time', 'budget']).default('time'),
+  /** Budget : devise ISO 4217 (« EUR ») ; `null` tant que le Budget n'est pas configuré. */
+  currency: z
+    .string()
+    .regex(/^[A-Z]{3}$/)
+    .nullable()
+    .default(null),
   schemaVersion: z.number().int(),
   updatedAt: timestamp,
 });
@@ -187,6 +279,8 @@ export function defaultSettings(now = new Date()): Settings {
     options: { ...DEFAULT_OPTIONS },
     trophiesSeen: [],
     focusCount: 0,
+    mode: 'time',
+    currency: null,
     schemaVersion: DB_VERSION,
     updatedAt: now.toISOString(),
   };
@@ -207,5 +301,11 @@ export const BackupSchema = z.object({
   goals: z.array(GoalSchema).default([]),
   reviews: z.array(ReviewSchema).default([]),
   suggestions: z.array(SuggestionSchema).default([]),
+  // Tables de la v3 (Budget) : absentes d'une sauvegarde plus ancienne.
+  accounts: z.array(MoneyAccountSchema).default([]),
+  moneyCategories: z.array(MoneyCategorySchema).default([]),
+  transactions: z.array(MoneyTransactionSchema).default([]),
+  recurrings: z.array(MoneyRecurringSchema).default([]),
+  savingsGoals: z.array(SavingsGoalSchema).default([]),
 });
 export type Backup = z.infer<typeof BackupSchema>;

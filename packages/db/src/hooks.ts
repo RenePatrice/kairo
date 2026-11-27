@@ -3,6 +3,13 @@ import type { CheckMap, EnergyMap } from '@kairo/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { createContext, useContext } from 'react';
 import type { KairoDB } from './database';
+import {
+  listAccounts,
+  listMoneyCategories,
+  listRecurrings,
+  listSavingsGoals,
+  listTransactions,
+} from './money';
 import { readEnergy } from './progress';
 import { getSettings, listBlocks, listCategories, readChecks } from './repo';
 import type { Block, Category, Goal, Review, Settings } from './schema';
@@ -72,4 +79,31 @@ export function useReviews(): Readonly<Record<string, Review>> | undefined {
     async () => Object.fromEntries((await db.reviews.toArray()).map((r) => [r.id, r])),
     [db],
   );
+}
+
+// ---- Budget
+
+export function useAccounts() {
+  const db = useDb();
+  return useLiveQuery(() => listAccounts(db), [db]);
+}
+
+export function useMoneyCategories() {
+  const db = useDb();
+  return useLiveQuery(() => listMoneyCategories(db), [db]);
+}
+
+export function useTransactions() {
+  const db = useDb();
+  return useLiveQuery(() => listTransactions(db), [db]);
+}
+
+export function useRecurrings() {
+  const db = useDb();
+  return useLiveQuery(() => listRecurrings(db), [db]);
+}
+
+export function useSavingsGoals() {
+  const db = useDb();
+  return useLiveQuery(() => listSavingsGoals(db), [db]);
 }

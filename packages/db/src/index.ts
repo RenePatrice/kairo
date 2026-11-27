@@ -6,3 +6,4 @@ export * from './backup';
 export * from './hooks';
 export * from './progress';
 export * from './suggestions';
+export * from './money';

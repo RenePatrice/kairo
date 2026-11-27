@@ -6,7 +6,12 @@ import type {
   Completion,
   Energy,
   Goal,
+  MoneyAccountRow,
+  MoneyCategoryRow,
+  MoneyRecurringRow,
+  MoneyTransactionRow,
   RestDay,
+  SavingsGoalRow,
   Review,
   Settings,
   StepProgress,
@@ -24,6 +29,11 @@ export class KairoDB extends Dexie {
   goals!: EntityTable<Goal, 'id'>;
   reviews!: EntityTable<Review, 'id'>;
   suggestions!: EntityTable<Suggestion, 'id'>;
+  accounts!: EntityTable<MoneyAccountRow, 'id'>;
+  moneyCategories!: EntityTable<MoneyCategoryRow, 'id'>;
+  transactions!: EntityTable<MoneyTransactionRow, 'id'>;
+  recurrings!: EntityTable<MoneyRecurringRow, 'id'>;
+  savingsGoals!: EntityTable<SavingsGoalRow, 'id'>;
 
   constructor(name = 'kairo') {
     super(name);
@@ -51,6 +61,25 @@ export class KairoDB extends Dexie {
             s.trophiesSeen ??= [];
             s.focusCount ??= 0;
             s.schemaVersion = 2;
+          });
+      });
+    // v3 : le Budget (comptes, catégories, opérations, récurrent, épargne) et le mode d'app.
+    this.version(3)
+      .stores({
+        accounts: 'id, order, deleted',
+        moneyCategories: 'id, order, deleted',
+        transactions: 'id, date, accountId, categoryId, recurringId, deleted',
+        recurrings: 'id, deleted',
+        savingsGoals: 'id, deleted',
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table<Settings, 'id'>('settings')
+          .toCollection()
+          .modify((s) => {
+            s.mode ??= 'time';
+            s.currency ??= null;
+            s.schemaVersion = 3;
           });
       });
   }

@@ -48,7 +48,12 @@ describe('migration v1 → v2', () => {
 
     const v2 = new KairoDB(name);
     const s = await getSettings(v2);
-    expect(s).toMatchObject({ started: true, trophiesSeen: [], focusCount: 0, schemaVersion: 2 });
+    expect(s).toMatchObject({
+      started: true,
+      trophiesSeen: [],
+      focusCount: 0,
+      schemaVersion: DB_VERSION,
+    });
     expect(v2.verno).toBe(DB_VERSION);
     expect(await v2.suggestions.count()).toBe(0);
     await v2.delete();
