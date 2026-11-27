@@ -295,7 +295,8 @@ function BackButton() {
         else if (ui.assistant) ui.setAssistant(false);
         else if (ui.notif) ui.setNotif(null);
         else if (ui.screen === 'rhythm' || ui.screen === 'acts') ui.go(ONBOARDING_BACK[ui.screen]);
-        else if (ui.screen === 'ops' || ui.screen === 'envelopes') ui.go('money');
+        else if (ui.screen === 'ops' || ui.screen === 'envelopes' || ui.screen === 'moneyStats')
+          ui.go('money');
         else if (ui.screen === 'week' || ui.screen === 'stats') ui.go('today');
         else if (ui.screen === 'me') ui.go(modeRef.current === 'budget' ? 'money' : 'today');
         else return false;

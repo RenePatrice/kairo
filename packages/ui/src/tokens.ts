@@ -311,3 +311,13 @@ export const loops = {
 
 /** Points de rupture (px), mobile d'abord. */
 export const breakpoints = { tablet: 600, desktop: 1024 } as const;
+
+/**
+ * Séries des graphiques à deux séries (revenus / dépenses). Les pastels de la palette sont trop
+ * clairs pour un graphique : ces paires bleu / orange passent le validateur dataviz (bande de
+ * luminosité, daltonismes, contraste) sur Minuit, OLED et Papier.
+ */
+export const chartSeries = {
+  dark: { income: '#4F8EF0', expense: '#E0782E' },
+  light: { income: '#2F6FD6', expense: '#C2601A' },
+} as const;

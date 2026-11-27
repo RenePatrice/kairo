@@ -17,7 +17,8 @@ export type Screen =
   // Budget
   | 'money'
   | 'ops'
-  | 'envelopes';
+  | 'envelopes'
+  | 'moneyStats';
 export type SheetKind =
   | 'block'
   | 'act'

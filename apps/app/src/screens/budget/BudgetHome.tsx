@@ -198,6 +198,21 @@ export function BudgetHome() {
         </GlassSurface>
       ) : null}
 
+      <GlassSurface className="rounded-card">
+        <Pressable
+          onClick={() => go('moneyStats')}
+          className="flex w-full items-center gap-3 rounded-card p-4 text-left"
+        >
+          <span className="flex flex-1 flex-col gap-0.5">
+            <span className="text-body font-semibold">{t('budget.stats.entry')}</span>
+            <span className="text-caption text-ink3">{t('budget.stats.entryHint')}</span>
+          </span>
+          <span aria-hidden="true" className="text-input text-ink2">
+            →
+          </span>
+        </Pressable>
+      </GlassSurface>
+
       <SavingsGoals />
 
       <section className="flex flex-col gap-2" aria-label={t('budget.home.recent')}>

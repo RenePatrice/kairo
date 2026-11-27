@@ -25,6 +25,7 @@ import { BudgetHome } from '../screens/budget/BudgetHome';
 import { BudgetSetup } from '../screens/budget/BudgetSetup';
 import { OpsScreen } from '../screens/budget/OpsScreen';
 import { EnvelopesScreen } from '../screens/budget/EnvelopesScreen';
+import { MoneyStatsScreen } from '../screens/budget/MoneyStatsScreen';
 import { ModeSwitch } from '../components/ModeSwitch';
 import { useMoneyActions } from '../lib/budget';
 import { WeekScreen } from '../screens/WeekScreen';
@@ -59,10 +60,12 @@ function screenFor(screen: Screen): ReactNode {
       return <OpsScreen />;
     case 'envelopes':
       return <EnvelopesScreen />;
+    case 'moneyStats':
+      return <MoneyStatsScreen />;
   }
 }
 
-const BUDGET_SCREENS: readonly Screen[] = ['money', 'ops', 'envelopes'];
+const BUDGET_SCREENS: readonly Screen[] = ['money', 'ops', 'envelopes', 'moneyStats'];
 
 export function Shell({ screen }: { screen: Screen }) {
   const { t } = useTranslation('app');
@@ -100,7 +103,7 @@ export function Shell({ screen }: { screen: Screen }) {
   const dock = (
     <Dock
       tabs={tabs}
-      current={screen}
+      current={screen === 'moneyStats' ? 'money' : screen}
       onSelect={(id) => go(id as Screen)}
       onAssistant={() => setAssistant(true)}
       center={

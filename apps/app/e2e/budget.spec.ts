@@ -230,3 +230,38 @@ test('objectif d’épargne : mensualité nécessaire pour la date visée', asyn
   await expect(goal).toContainText(/100,00.*400,00/);
   await expect(goal).toContainText(/75,00.*par mois pour y être le 23 mars 2027/);
 });
+
+test('bilans : 6 mois, taux d’épargne, top des dépenses, accessibles', async ({ page }, info) => {
+  test.setTimeout(180_000);
+  await setupBudget(page);
+  await addTransaction(page, { kind: 'Revenu', amount: '2000', category: 'Salaire' });
+  await addTransaction(page, { amount: '500', category: 'Courses' });
+  await addTransaction(page, { amount: '100', category: 'Transport' });
+  await page.getByRole('button', { name: /Bilans · 6 mois/ }).click();
+  await expect(page.getByRole('heading', { name: /Tes bilans/ })).toBeVisible();
+
+  await expect(page.getByText('70 %', { exact: true }).first()).toBeVisible();
+  const top = page.getByRole('region', { name: 'Top des dépenses du mois' });
+  await expect(top.getByText('Courses')).toBeVisible();
+  await expect(top.getByText('nouveau').first()).toBeVisible();
+  // Tableau pour les lecteurs d'écran : un mois par ligne.
+  const table = page.getByRole('table', { name: 'Tableau des six derniers mois' });
+  await expect(table.getByRole('row')).toHaveCount(7);
+  await expect(table.getByRole('row', { name: /novembre 2026/ })).toContainText(eur('2 000,00 €'));
+
+  await noHorizontalOverflow(page);
+  await settle(page);
+  const { violations } = await new AxeBuilder({ page }).analyze();
+  expect(
+    violations
+      .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+      .map((v) => `${v.id} ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
+  ).toEqual([]);
+  await page.screenshot({
+    path: `test-results/shots/${info.project.name}-budget-stats.png`,
+    fullPage: true,
+  });
+
+  await page.getByRole('button', { name: /Retour à l’aperçu/ }).click();
+  await expect(page.getByRole('heading', { name: /Ton budget/ })).toBeVisible();
+});
