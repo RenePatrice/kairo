@@ -33,9 +33,27 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Annonces vocales des rappels (KairoNativePlugin) -->
+        <receiver android:name=".VoiceReceiver" android:exported="false" />
+        <receiver android:name=".BootReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
+
+    <!-- Voix de synthèse : Android 11+ doit savoir que l'app parle au moteur de voix. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Rappels à la minute près : accordé d'office à une app d'agenda (Android 13+). -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 </manifest>

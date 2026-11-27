@@ -3,6 +3,7 @@ import { webBack } from './back';
 import { createWebFiles } from './files';
 import { createWebSpeech } from './speech';
 import { createWebNotifications } from './webNotifications';
+import { createWebVoice, webFocusStatus } from './voice';
 
 /** Motifs de vibration (ms) pour les navigateurs qui la supportent (Chrome Android). */
 export const VIBRATION_PATTERNS = {
@@ -43,6 +44,8 @@ export function createWebPlatform(): Platform {
     speech: createWebSpeech(),
     files: createWebFiles(),
     back: webBack,
+    voice: createWebVoice(),
+    focusStatus: webFocusStatus,
   };
 }
 

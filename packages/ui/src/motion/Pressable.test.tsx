@@ -4,6 +4,8 @@ import {
   createWebFiles,
   webBack,
   createWebSpeech,
+  createWebVoice,
+  webFocusStatus,
   type Platform,
 } from '@kairo/platform';
 import { render, screen } from '@testing-library/react';
@@ -22,6 +24,8 @@ function setup(haptic: boolean) {
     speech: createWebSpeech(null),
     files: createWebFiles(null),
     back: webBack,
+    voice: createWebVoice(null),
+    focusStatus: webFocusStatus,
   };
   const onClick = vi.fn();
   render(

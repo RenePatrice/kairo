@@ -8,8 +8,10 @@ import { createNativeBack } from './back';
 import { createNativeFiles } from './files';
 import { createNativeNotifications } from './nativeNotifications';
 import { createNativeSpeech } from './speech';
+import { createNativeFocusStatus, createNativeVoice } from './voice';
 import type { Haptics, Platform } from './types';
 import { createWebPlatform } from './web';
+import { createWebVoice, webFocusStatus } from './voice';
 
 const IMPACT = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
 const NOTIFY = {
@@ -41,5 +43,8 @@ export function detectPlatform(): Platform {
     speech: createNativeSpeech(),
     files: createNativeFiles(),
     back: createNativeBack(),
+    // Module Kairo écrit pour Android ; iOS garde la version web en attendant.
+    voice: kind === 'android' ? createNativeVoice() : createWebVoice(),
+    focusStatus: kind === 'android' ? createNativeFocusStatus() : webFocusStatus,
   };
 }

@@ -11,7 +11,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNotifications } from '@kairo/platform';
+import { useNotifications, useVoice } from '@kairo/platform';
 import { useCheckIns } from '../lib/checkins';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
@@ -27,7 +27,10 @@ const CELEBRATED_KEY = 'kairo.celebrated';
  * de la « Journée parfaite ». Les notifications système sont programmées par ReminderScheduler.
  */
 export function ReminderWatcher() {
-  const { settings, blocks, checks, restDays } = useAppData();
+  const { t } = useTranslation('app');
+  const f = useFormat();
+  const voice = useVoice();
+  const { settings, blocks, checks, restDays, categoryOf } = useAppData();
   const setNotif = useUi((s) => s.setNotif);
   const celebrate = useUi((s) => s.celebrate);
   const now = useNow(15_000);
@@ -50,6 +53,18 @@ export function ReminderWatcher() {
       const key = `${day}|${r.occurrence.slot.id}|${r.kind}|${minute}`;
       if (fired.current.has(key)) continue;
       fired.current.add(key);
+      // Navigateur : la voix parle avec la bannière. L'APK a ses annonces programmées.
+      if (settings.options.voice && !voice.background) {
+        const name = categoryOf(r.occurrence.slot.categoryId).name;
+        void voice.speak(
+          r.kind === 'end'
+            ? t('notif.sayEnded', { name })
+            : r.lead
+              ? t('notif.sayInMinutes', { name, n: r.lead })
+              : t('notif.sayStarts', { name }),
+          f.locale,
+        );
+      }
       setNotif(
         r.kind === 'start'
           ? { kind: 'start', blockId: r.occurrence.slot.id, lead: r.lead }
@@ -58,7 +73,20 @@ export function ReminderWatcher() {
     }
     // `now` change toutes les 15 s ; la minute et le jour suffisent comme clés.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minute, day, blocks, checks, restDays, settings, setNotif, systemHandles]);
+  }, [
+    minute,
+    day,
+    blocks,
+    checks,
+    restDays,
+    settings,
+    setNotif,
+    systemHandles,
+    voice,
+    categoryOf,
+    t,
+    f,
+  ]);
 
   useEffect(() => {
     if (!isPerfectDay(blocks, new Date(), checks)) return;

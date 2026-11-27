@@ -62,6 +62,16 @@ describe('réglages', () => {
     expect(s.options).toMatchObject({ solid: false, remind: true, local: true, haptic: true });
   });
 
+  it('complète les options ajoutées après coup (annonce vocale active par défaut)', async () => {
+    await updateSettings(db, { started: true });
+    const raw = await db.settings.get('app');
+    if (!raw) throw new Error('réglages absents');
+    const older: Partial<typeof raw.options> = { ...raw.options };
+    delete older.voice;
+    await db.settings.put({ ...raw, options: older as typeof raw.options });
+    expect((await getSettings(db)).options.voice).toBe(true);
+  });
+
   it('enregistre langue, profil et options', async () => {
     await updateSettings(db, { locale: 'en' });
     await updateProfile(db, { name: 'Camille', wakeMin: 360 });

@@ -16,6 +16,7 @@ import {
   upcomingReminders,
   weekKey,
   weekReview,
+  splitDuration,
 } from '@kairo/core';
 import {
   addGoals,
@@ -27,7 +28,13 @@ import {
   useGoals,
   useReviews,
 } from '@kairo/db';
-import { REMINDER_GRACE_MS, useBack, useNotifications } from '@kairo/platform';
+import {
+  REMINDER_GRACE_MS,
+  useBack,
+  useFocusStatus,
+  useNotifications,
+  useVoice,
+} from '@kairo/platform';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBudget } from '../lib/budget';
@@ -47,6 +54,7 @@ export function Watchers() {
       <ReminderScheduler now={now} />
       <BackButton />
       <RecurringWatcher now={now} />
+      <FocusStatusSync />
     </>
   );
 }
@@ -180,11 +188,48 @@ function ReminderScheduler({ now }: { now: Date }) {
   const { t } = useTranslation('app');
   const f = useFormat();
   const notifications = useNotifications();
+  const voice = useVoice();
   const { settings, blocks, checks, restDays, categoryOf } = useAppData();
   const permission = useUi((s) => s.notifPermission);
   const setPermission = useUi((s) => s.setNotifPermission);
   const slot = Math.floor(now.getTime() / RESCHEDULE_MS);
-  const { remind, endCheck } = settings.options;
+  const { remind, endCheck, voice: speakOn } = settings.options;
+
+  // Annonces vocales (APK) : programmées à part, elles parlent même sans autorisation de notifier.
+  useEffect(() => {
+    if (!voice.background) return;
+    const on = settings.started && speakOn && (remind || endCheck);
+    const list = on
+      ? upcomingReminders(blocks, new Date(), { remind, endCheck, checks, restDays }).flatMap(
+          (r) => {
+            const block = blocks.find((b) => b.id === r.slotId);
+            if (!block) return [];
+            const name = categoryOf(block.categoryId).name;
+            const text =
+              r.kind === 'end'
+                ? t('notif.sayEnded', { name })
+                : r.lead
+                  ? t('notif.sayInMinutes', { name, n: r.lead })
+                  : t('notif.sayStarts', { name });
+            return [{ id: reminderId(`voice|${r.key}`), at: r.at, text }];
+          },
+        )
+      : [];
+    void voice.schedule(list, f.locale);
+  }, [
+    voice,
+    settings.started,
+    speakOn,
+    remind,
+    endCheck,
+    blocks,
+    checks,
+    restDays,
+    categoryOf,
+    t,
+    f,
+    slot,
+  ]);
   // Données stables seulement : l'objet renvoyé par useBudget change à chaque rendu, et
   // reprogrammer toutes les notifications à chaque rendu serait coûteux sur le téléphone.
   const { recurrings, money, categoryOf: moneyCategoryOf } = useBudget();
@@ -315,5 +360,44 @@ function RecurringWatcher({ now }: { now: Date }) {
   useEffect(() => {
     if (settings.currency) void applyDueRecurring(db, day);
   }, [db, day, settings.currency]);
+  return null;
+}
+
+/**
+ * Minuteur de focus hors de l'app (APK) : notification permanente avec compte à rebours,
+ * visible sur l'écran verrouillé et dans le volet, retirée à la fin du focus.
+ */
+function FocusStatusSync() {
+  const { t } = useTranslation('app');
+  const f = useFormat();
+  const status = useFocusStatus();
+  const { blocks, categoryOf } = useAppData();
+  const focus = useUi((s) => s.focus);
+
+  useEffect(() => {
+    if (!focus) {
+      void status.hide();
+      return;
+    }
+    const block = blocks.find((b) => b.id === focus.slotId);
+    const name = block ? categoryOf(block.categoryId).name : t('focus.fallback');
+    const p = focus.pomodoro;
+    const paused = focus.pausedLeft !== null;
+    const { h, m, s } = splitDuration(focus.pausedLeft ?? 0);
+    const two = (n: number) => String(n).padStart(2, '0');
+    const left = h ? `${h}:${two(m)}:${two(s)}` : `${m}:${two(s)}`;
+    const text = paused
+      ? t('focus.statusPaused', { left })
+      : p
+        ? t(p.phase === 'work' ? 'focus.statusWork' : 'focus.statusBreak', { n: p.cycles + 1 })
+        : t('focus.statusEnds', { end: f.clock(block?.endMin ?? 0) });
+    void status.show({
+      title: t('focus.statusTitle', { name }),
+      text,
+      endAt: paused ? null : (p?.endAt ?? focus.endAt),
+    });
+  }, [focus, blocks, categoryOf, status, t, f]);
+
+  useEffect(() => () => void status.hide(), [status]);
   return null;
 }

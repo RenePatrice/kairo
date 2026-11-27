@@ -28,6 +28,16 @@ export function useSpeech(): Platform['speech'] {
   return useContext(PlatformContext).speech;
 }
 
+/** Voix des rappels. */
+export function useVoice(): Platform['voice'] {
+  return useContext(PlatformContext).voice;
+}
+
+/** Minuteur de focus hors de l'app. */
+export function useFocusStatus(): Platform['focusStatus'] {
+  return useContext(PlatformContext).focusStatus;
+}
+
 /** Haptique de la plateforme courante. */
 export function useHaptics(): Platform['haptics'] {
   return useContext(PlatformContext).haptics;

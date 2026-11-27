@@ -61,6 +61,20 @@ Pour chaque nouvelle version, augmentez `versionCode` (et `versionName`) dans
 Installer : `C:\Android\Sdk\platform-tools\adb.exe install -r <apk>`. Un APK release ne
 s'installe pas par-dessus l'APK de debug (signatures différentes) : désinstallez d'abord.
 
+## Rappels, voix et minuteur de focus
+
+- **Notifications** : Kairo demande l'autorisation à la fin de l'accueil et au premier créneau
+  avec rappel. Si elle a été refusée : Paramètres Android → Applications → Kairo → Notifications.
+- **À la minute près** : la permission `USE_EXACT_ALARM` (app d'agenda) est accordée d'office.
+- **Annonce vocale** : module natif `KairoNativePlugin` (TextToSpeech d'Android), programmé avec
+  AlarmManager : la voix parle même app fermée, au volume des notifications (muette en mode
+  silencieux). Réglages → « Annonce vocale » pour la couper. Il faut une voix française
+  installée (Paramètres → Synthèse vocale).
+- **Minuteur de focus** : notification permanente avec compte à rebours, visible sur l'écran
+  verrouillé et dans le volet ; un appui rouvre l'app.
+- **Économie de batterie** : sur certains téléphones (Xiaomi, Tecno, Infinix, Samsung…), régler
+  la batterie de Kairo sur « Sans restriction », sinon le système peut bloquer les rappels.
+
 ## Ouvrir dans Android Studio (facultatif)
 
 `pnpm android:open`

@@ -26,17 +26,19 @@ import {
 } from '@kairo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useFiles, useNotifications } from '@kairo/platform';
+import { useFiles, useNotifications, useVoice } from '@kairo/platform';
 import { useBilanActions } from '../lib/bilans';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
 import { useSheetActions } from '../lib/actions';
 import { useNow } from '../lib/useNow';
+import { useAskNotifications } from '../lib/notifPermission';
 import { useUi } from '../store';
 
 const OPTION_KEYS: ReadonlyArray<keyof Options> = [
   'solid',
   'remind',
+  'voice',
   'local',
   'haptic',
   'autoReview',
@@ -58,7 +60,6 @@ export function SettingsScreen() {
   const flash = useUi((s) => s.flash);
   const go = useUi((s) => s.go);
   const setNotif = useUi((s) => s.setNotif);
-  const setNotifPermission = useUi((s) => s.setNotifPermission);
   const notifications = useNotifications();
   const files = useFiles();
   const restoreInput = useRef<HTMLInputElement>(null);
@@ -109,13 +110,8 @@ export function SettingsScreen() {
     }
   };
 
-  /** Demande l'autorisation des notifications système, seulement si elle n'a jamais été donnée. */
-  const askPermission = async () => {
-    const current = await notifications.permission();
-    const next = current === 'prompt' ? await notifications.request() : current;
-    setNotifPermission(next);
-    return next;
-  };
+  const askPermission = useAskNotifications();
+  const voice = useVoice();
 
   const testReminder = async () => {
     const todays = occurrencesOn(blocks, now);
@@ -123,8 +119,10 @@ export function SettingsScreen() {
     if (!b) return flash(t('settings.needBlock'));
     const lead = b.reminderMin || DEFAULT_TEST_LEAD;
     setNotif({ kind: 'start', blockId: b.id, lead });
+    const name = categoryOf(b.categoryId).name;
+    if (settings.options.voice)
+      void voice.speak(t('notif.sayInMinutes', { name, n: lead }), f.locale);
     if ((await askPermission()) === 'granted') {
-      const name = categoryOf(b.categoryId).name;
       await notifications.showNow({
         id: 1,
         title: t('notif.inMinutes', { name, n: lead }),

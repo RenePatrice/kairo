@@ -5,6 +5,7 @@ import { OnboardingStep, StepDots } from '../../components/Onboarding';
 import { GoalStepper } from '../../components/GoalStepper';
 import { Swatches } from '../../components/Swatches';
 import { useAppData } from '../../lib/data';
+import { useAskNotifications } from '../../lib/notifPermission';
 import { emptyActForm, useUi } from '../../store';
 
 /** Accueil, étape 3 : « Qu'est-ce qui compte pour toi ? » — activités, couleurs, objectifs. */
@@ -30,6 +31,7 @@ export function ActivitiesStep() {
     await addCategory(db, { name, color: form.color, weeklyGoalH: form.weeklyGoalH });
   };
 
+  const askNotifications = useAskNotifications();
   const finish = async () => {
     if (!categories.length) {
       flash(t('acts.needOne'));
@@ -38,6 +40,8 @@ export function ActivitiesStep() {
     await updateSettings(db, { started: true });
     go('week');
     flash(t('acts.placeSlots'));
+    // Les rappels sont activés par défaut : sans autorisation, aucun ne s'afficherait.
+    void askNotifications();
   };
 
   return (

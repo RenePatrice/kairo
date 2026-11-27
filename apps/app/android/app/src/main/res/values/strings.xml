@@ -4,4 +4,6 @@
     <string name="title_activity_main">Kairo</string>
     <string name="package_name">app.kairo.planner</string>
     <string name="custom_url_scheme">app.kairo.planner</string>
+    <string name="focus_channel">Minuteur de focus</string>
+    <string name="focus_channel_desc">Le temps restant de ta session de focus</string>
 </resources>

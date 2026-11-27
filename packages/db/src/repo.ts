@@ -8,6 +8,7 @@ import { uuidv7 } from './ids';
 import {
   BlockSchema,
   CategorySchema,
+  DEFAULT_OPTIONS,
   defaultSettings,
   type Block,
   type Category,
@@ -29,7 +30,9 @@ export function capitalize(s: string): string {
 // ---- Réglages
 
 export async function getSettings(db: KairoDB): Promise<Settings> {
-  return (await db.settings.get('app')) ?? defaultSettings();
+  const s = await db.settings.get('app');
+  // Options ajoutées après coup (ex. « voice ») : valeur par défaut si absentes.
+  return s ? { ...s, options: { ...DEFAULT_OPTIONS, ...s.options } } : defaultSettings();
 }
 
 export async function updateSettings(

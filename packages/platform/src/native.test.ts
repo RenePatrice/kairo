@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 const calls: string[] = [];
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => true), getPlatform: vi.fn(() => 'android') },
+  registerPlugin: vi.fn(() => ({})),
 }));
 vi.mock('@capacitor/haptics', () => ({
   ImpactStyle: { Light: 'LIGHT', Medium: 'MEDIUM', Heavy: 'HEAVY' },
@@ -28,6 +29,7 @@ describe('plateforme native', () => {
     const p = detectPlatform();
     expect(p.kind).toBe('android');
     expect(p.notifications.background).toBe(true);
+    expect(p.voice.background).toBe(true);
     await p.haptics.impact('heavy');
     await p.haptics.notify('success');
     await p.haptics.selection();

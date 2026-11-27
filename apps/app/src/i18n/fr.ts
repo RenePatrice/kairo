@@ -284,6 +284,11 @@ export const fr = {
     toBreak: 'Pause de 5 min. Respire.',
     toWork: 'C’est reparti pour 25 min.',
     fallback: 'Focus',
+    statusTitle: '{{name}} · focus',
+    statusEnds: 'Fin à {{end}}',
+    statusPaused: 'En pause · {{left}} restantes',
+    statusWork: 'Concentration · cycle {{n}}',
+    statusBreak: 'Pause · cycle {{n}}',
   },
   assistant: {
     title: 'Assistant',
@@ -954,6 +959,7 @@ export const fr = {
       },
       clock12: { name: 'Format 12 h', desc: 'Afficher 6:30 pm au lieu de 18:30' },
       big: { name: 'Texte plus grand', desc: 'Agrandit toute l’interface' },
+      voice: { name: 'Annonce vocale', desc: 'Une voix annonce chaque rappel, même app fermée' },
     },
     testReminder: 'Tester un rappel',
     demo: 'Données de démo',
@@ -990,6 +996,9 @@ export const fr = {
     ok: 'OK',
     snooze: 'Je te le rappelle dans 10 min',
     open: 'Voir',
+    sayInMinutes: '{{name}} dans {{n}} minutes.',
+    sayStarts: 'C’est l’heure : {{name}}.',
+    sayEnded: '{{name}} est terminé. Comment ça s’est passé ?',
   },
 };
 

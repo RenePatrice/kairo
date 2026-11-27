@@ -217,6 +217,8 @@ export const OptionsSchema = z.object({
   endCheck: z.boolean(),
   clock12: z.boolean(),
   big: z.boolean(),
+  /** Annonce vocale des rappels (« Sport dans 10 minutes »). */
+  voice: z.boolean().default(true),
 });
 export type Options = z.infer<typeof OptionsSchema>;
 
@@ -266,6 +268,7 @@ export const DEFAULT_OPTIONS: Options = {
   endCheck: false,
   clock12: false,
   big: false,
+  voice: true,
 };
 
 export function defaultSettings(now = new Date()): Settings {

@@ -270,6 +270,11 @@ export const en: AppStrings = {
     toBreak: '5-minute break. Breathe.',
     toWork: 'Back to it for 25 min.',
     fallback: 'Focus',
+    statusTitle: '{{name}} · focus',
+    statusEnds: 'Ends at {{end}}',
+    statusPaused: 'Paused · {{left}} left',
+    statusWork: 'Focus · cycle {{n}}',
+    statusBreak: 'Break · cycle {{n}}',
   },
   assistant: {
     title: 'Assistant',
@@ -939,6 +944,10 @@ export const en: AppStrings = {
       },
       clock12: { name: '12-hour clock', desc: 'Show 6:30 pm instead of 18:30' },
       big: { name: 'Larger text', desc: 'Enlarges the whole interface' },
+      voice: {
+        name: 'Voice announcement',
+        desc: 'A voice reads each reminder, even with the app closed',
+      },
     },
     testReminder: 'Test a reminder',
     demo: 'Demo data',
@@ -975,5 +984,8 @@ export const en: AppStrings = {
     ok: 'OK',
     snooze: 'I’ll remind you in 10 min',
     open: 'View',
+    sayInMinutes: '{{name}} in {{n}} minutes.',
+    sayStarts: 'It’s time: {{name}}.',
+    sayEnded: '{{name}} is over. How did it go?',
   },
 };

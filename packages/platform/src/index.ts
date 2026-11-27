@@ -7,3 +7,4 @@ export * from './nativeNotifications';
 export * from './speech';
 export * from './files';
 export * from './back';
+export * from './voice';

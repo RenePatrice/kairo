@@ -75,6 +75,37 @@ export interface Back {
   minimize(): Promise<void>;
 }
 
+/** Annonce vocale programmée (« Sport dans 10 minutes »), texte déjà traduit. */
+export interface VoiceAnnouncement {
+  id: number;
+  at: Date;
+  text: string;
+}
+
+/** Voix de synthèse : annonce les rappels à voix haute. */
+export interface Voice {
+  /** `true` si les annonces programmées parlent même app fermée (APK). */
+  readonly background: boolean;
+  /** Dit la phrase tout de suite (rappel app ouverte, test). */
+  speak(text: string, locale: SpeechLocale): Promise<void>;
+  /** Remplace toutes les annonces programmées. Sans effet sur le web (l'app parle quand elle est ouverte). */
+  schedule(list: readonly VoiceAnnouncement[], locale: SpeechLocale): Promise<void>;
+}
+
+/** Ce que montre le minuteur de focus hors de l'app. */
+export interface FocusStatusInfo {
+  title: string;
+  text: string;
+  /** Fin de la phase en cours (ms Unix) : compte à rebours en direct. `null` en pause. */
+  endAt: number | null;
+}
+
+/** Minuteur de focus visible hors de l'app : notification permanente, écran verrouillé. */
+export interface FocusStatus {
+  show(info: FocusStatusInfo): Promise<void>;
+  hide(): Promise<void>;
+}
+
 export interface Platform {
   kind: PlatformKind;
   haptics: Haptics;
@@ -82,4 +113,6 @@ export interface Platform {
   speech: Speech;
   files: Files;
   back: Back;
+  voice: Voice;
+  focusStatus: FocusStatus;
 }

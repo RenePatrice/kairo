@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppData } from '../lib/data';
 import { useFormat } from '../lib/format';
 import { useSheetActions } from '../lib/actions';
+import { useAskNotifications } from '../lib/notifPermission';
 import { useUi } from '../store';
 
 const QUICK_DURATIONS = [30, 45, 60, 90, 120, 240, 720] as const;
@@ -33,6 +34,7 @@ export function BlockSheet() {
   const close = useUi((s) => s.closeSheet);
   const flash = useUi((s) => s.flash);
 
+  const askNotifications = useAskNotifications();
   if (!form) return null;
   const length = durationMin(form.startMin, form.endMin);
   const rhythm = { wakeMin: settings.profile.wakeMin, sleepMin: settings.profile.sleepMin };
@@ -76,6 +78,7 @@ export function BlockSheet() {
       note: form.note,
     });
     close();
+    if (saved.reminderMin !== null && settings.options.remind) void askNotifications();
     flash(
       form.id
         ? t('block.updated')

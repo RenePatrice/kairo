@@ -80,3 +80,60 @@ test('sans autorisation, rien n’est envoyé au système', async ({ page }) => 
   await page.waitForTimeout(500);
   expect(await notes(page)).toEqual([]);
 });
+
+/** Fausse synthèse vocale : enregistre ce que la voix dirait. */
+async function fakeVoice(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __said: string[] };
+    w.__said = [];
+    class FakeUtterance {
+      lang = '';
+      constructor(public text: string) {}
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', {
+      value: FakeUtterance,
+      configurable: true,
+    });
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: {
+        cancel() {},
+        speak(u: FakeUtterance) {
+          w.__said.push(`${u.lang}|${u.text}`);
+        },
+      },
+      configurable: true,
+    });
+  });
+}
+
+const said = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __said: string[] }).__said);
+
+test('annonce vocale : la voix lit le rappel à l’heure, app ouverte', async ({ page }) => {
+  await fakeNotifications(page, { permission: 'denied', hidden: false });
+  await fakeVoice(page);
+  await page.clock.install({ time: MONDAY_1030 });
+  await onboard(page);
+  await addSlot(page, { steps: -29 });
+  await page.clock.runFor('06:00');
+  await expect.poll(() => said(page)).toEqual(['fr-FR|Salle dans 10 minutes.']);
+  await expect(page.getByText('Salle dans 10 min').first()).toBeVisible();
+});
+
+test('annonce vocale : réglage actif par défaut, et qui coupe la voix', async ({ page }) => {
+  await fakeNotifications(page, { permission: 'granted', hidden: false });
+  await fakeVoice(page);
+  await page.clock.install({ time: MONDAY_1030 });
+  await onboard(page);
+  await addSlot(page);
+  await page.getByRole('button', { name: 'Réglages' }).first().click();
+  const option = page.getByRole('switch', { name: /Annonce vocale/ });
+  await expect(option).toBeChecked();
+  await page.getByRole('button', { name: 'Tester un rappel' }).click();
+  await expect.poll(() => said(page)).toEqual(['fr-FR|Salle dans 10 minutes.']);
+  await option.click();
+  await expect(option).not.toBeChecked();
+  await page.getByRole('button', { name: 'Tester un rappel' }).click();
+  await page.waitForTimeout(500);
+  expect(await said(page)).toHaveLength(1);
+});
